@@ -1,0 +1,6 @@
+{
+  "name": "Support Center",
+  "version": "0.0.2",
+  "description": "Api Node/Express que utiliza ApiDoc.js",
+  "title": "Support Center API Docs"
+}

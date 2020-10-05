@@ -4,8 +4,8 @@
   "description": "Projeto Integrado de Web Design",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
-    "docs": "apidoc -f routes/produtos.js -f _apidoc.js -o public/apidoc"
+    "start": "nodemon src/server.js",
+    "docs": "apidoc -f _apidoc.js -o public/docs"
   },
   "repository": {
     "type": "git",
@@ -19,8 +19,10 @@
   },
   "homepage": "https://github.com/keys8410/node_api#readme",
   "dependencies": {
+    "@hapi/joi": "^17.1.1",
     "apidoc": "^0.25.0",
     "bcrypt": "^5.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
