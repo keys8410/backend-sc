@@ -1,40 +1,26 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
-
 const tokenPrivateKey = process.env.JWT_TOKEN_PRIVATE_KEY;
-const refreshTokenPrivateKey = process.env.JWT_REFRESH_TOKEN_PRIVATE_KEY;
 
 const options = { expiresIn: '30 minutes' };
-const refreshOptions = { expiresIn: '30 days' };
-
 
 const generateJwt = (payload) => {
-
-    return jwt.sign(payload, tokenPrivateKey, options);
+  return jwt.sign(payload, tokenPrivateKey, options);
 };
 
 const verifyJwt = (token) => {
-
-    return jwt.verify(token, tokenPrivateKey);
-};
-
-const generateRefreshJwt = (payload) => {
-
-    return jwt.sign(payload, refreshTokenPrivateKey, refreshOptions);
-};
-
-const verifyRefreshJwt = (token) => {
-
-    return jwt.verify(token, refreshTokenPrivateKey);
+  return jwt.verify(token, tokenPrivateKey);
 };
 
 const getTokenFromHeaders = (headers) => {
-    const token = headers['authorization'];
+  const token = headers['authorization'];
 
-    return token ? token.slice(7, token.length) : null;
-}
+  return token ? token.slice(7, token.length) : null;
+};
 
-
-
-module.exports = { verifyJwt, verifyRefreshJwt, generateJwt, generateRefreshJwt, getTokenFromHeaders };
+module.exports = {
+  verifyJwt,
+  generateJwt,
+  getTokenFromHeaders,
+};

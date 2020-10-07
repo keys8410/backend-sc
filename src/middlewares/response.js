@@ -5,77 +5,90 @@ const STATUS_CODE_OK = 200;
 const STATUS_CODE_BAD_RESQUEST = 400;
 const STATUS_CODE_UNAUTHORIZED = 401;
 const STATUS_CODE_NOT_FOUND = 404;
+const STATUS_CODE_CONFLICT = 409;
 const STATUS_CODE_SERVER_ERROR = 500;
 
-const jsonOK = function(data, message, metadata) {
-    const status = STATUS_CODE_OK;
+const jsonOK = function (data, message, metadata) {
+  const status = STATUS_CODE_OK;
 
-    message = (message) ? message : getMessages('response.json_ok');
-    metadata = (metadata) ? metadata : {};
+  message = message ? message : getMessages('response.json_ok');
+  metadata = metadata ? metadata : {};
 
-    this.status(status);
-    this.type(TYPE_JSON);
+  this.status(status);
+  this.type(TYPE_JSON);
 
-    return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status: status });
 };
 
-const jsonBadRequest = function(data, message, metadata) {
-    const status = STATUS_CODE_BAD_RESQUEST;
+const jsonBadRequest = function (data, message, metadata) {
+  const status = STATUS_CODE_BAD_RESQUEST;
 
-    message = (message) ? message : getMessages('response.json_bad_request');
-    metadata = (metadata) ? metadata : {};
+  message = message ? message : getMessages('response.json_bad_request');
+  metadata = metadata ? metadata : {};
 
-    this.status(status);
-    this.type(TYPE_JSON);
+  this.status(status);
+  this.type(TYPE_JSON);
 
-    return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status: status });
 };
 
-const jsonUnauthorized = function(data, message, metadata) {
-    const status = STATUS_CODE_UNAUTHORIZED;
+const jsonUnauthorized = function (data, message, metadata) {
+  const status = STATUS_CODE_UNAUTHORIZED;
 
-    message = (message) ? message : getMessages('response.json_unauthorized');
-    metadata = (metadata) ? metadata : {};
+  message = message ? message : getMessages('response.json_unauthorized');
+  metadata = metadata ? metadata : {};
 
-    this.status(status);
-    this.type(TYPE_JSON);
+  this.status(status);
+  this.type(TYPE_JSON);
 
-    return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status: status });
 };
 
-const jsonNotFound = function(data, message, metadata) {
-    const status = STATUS_CODE_NOT_FOUND;
+const jsonNotFound = function (data, message, metadata) {
+  const status = STATUS_CODE_NOT_FOUND;
 
-    message = (message) ? message : getMessages('response.json_not_found');
-    metadata = (metadata) ? metadata : {};
+  message = message ? message : getMessages('response.json_not_found');
+  metadata = metadata ? metadata : {};
 
-    this.status(status);
-    this.type(TYPE_JSON);
+  this.status(status);
+  this.type(TYPE_JSON);
 
-    return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status: status });
 };
 
-const jsonServerError = function(data, message, metadata) {
-    const status = STATUS_CODE_SERVER_ERROR;
+const jsonConflict = function (data, message, metadata) {
+  const status = STATUS_CODE_SERVER_ERROR;
 
-    message = (message) ? message : getMessages('response.json_server_error');
-    metadata = (metadata) ? metadata : {};
+  message = message ? message : getMessages('response.json_conflict');
+  metadata = metadata ? metadata : {};
 
-    this.status(status);
-    this.type(TYPE_JSON);
+  this.status(status);
+  this.type(TYPE_JSON);
 
-    return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status: status });
 };
 
-const response = (req, res, next) => {
+const jsonServerError = function (data, message, metadata) {
+  const status = STATUS_CODE_SERVER_ERROR;
 
-    res.jsonOK = jsonOK;
-    res.jsonBadRequest = jsonBadRequest;
-    res.jsonUnauthorized = jsonUnauthorized;
-    res.jsonNotFound = jsonNotFound;
-    res.jsonServerError = jsonServerError;
+  message = message ? message : getMessages('response.json_server_error');
+  metadata = metadata ? metadata : {};
 
-    next();
+  this.status(status);
+  this.type(TYPE_JSON);
+
+  return this.json({ message, data, metadata, status: status });
 };
 
-module.exports = response;
+const resp = (req, res, next) => {
+  res.jsonOK = jsonOK;
+  res.jsonBadRequest = jsonBadRequest;
+  res.jsonUnauthorized = jsonUnauthorized;
+  res.jsonNotFound = jsonNotFound;
+  res.jsonConflict = jsonConflict;
+  res.jsonServerError = jsonServerError;
+
+  next();
+};
+
+module.exports = resp;
