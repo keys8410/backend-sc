@@ -1,0 +1,25 @@
+@baseUrl = http://localhost:3001/v1
+
+@contentType = application/json
+
+
+### /users all users
+GET {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+
+### /users unique user
+GET {{baseUrl}}/users/1
+Content-Type: {{contentType}}
+
+
+### /users add user
+POST {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "nome_usuario": "Yan Almeida Garcia Guguzinho",
+  "email_usuario": "yan@almeida.com"
+}
+
+
