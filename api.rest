@@ -18,8 +18,19 @@ POST {{baseUrl}}/users
 Content-Type: {{contentType}}
 
 {
-  "nome_usuario": "Yan Almeida Garcia Guguzinho",
-  "email_usuario": "yan@almeida.com"
+  "cpf_usuario": "000.256.614-55",
+  "email_usuario": "yasdfsna@gsadefasdfarcia.com",
+  "nome_usuario": "Yan Almeida",
+  "tel_usuario": "(61) 14444-4444",
+  "setor_usuario": 1,
+  "sexo_usuario": 1
 }
 
+### /users delete user
 
+DELETE {{baseUrl}}/users
+Content-Type: {{contentType}}
+
+{
+  "id_usuario": 4
+}

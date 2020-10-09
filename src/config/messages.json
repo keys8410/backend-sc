@@ -10,6 +10,7 @@
   "account.signin.invalid": "Credenciais inválidas.",
   "account.signin.email.string.empty": "Email obrigatório.",
   "account.signin.email.any.required": "Email obrigatório.",
+  "account.signin.all.any.required": "Campos obrigatórios.",
   "account.signin.email.string.email": "Email não é válido.",
   "account.signin.password.string.empty": "Senha obrigatória.",
   "account.signin.password.string.pattern.base": "Senha deve conter entre 3 a 30 caracteres.",
