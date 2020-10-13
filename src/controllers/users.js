@@ -5,106 +5,109 @@ const mysql = require('../config/mysql');
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
 const { validateNewUser } = require('../validators/users');
+const checkId = require('../middlewares/checkId');
+const runMailer = require('../helpers/mailer');
 
 const SALTS = 10;
 
+router.get('/send', (req, res, next) => {
+  res.status(202).send('teste');
+});
+
 router.get('/', async (req, res) => {
   const query = ` SELECT
-                      USER.id_usuario AS id,
-                      USER.nome_usuario AS name,
-                      USER.sobre_usuario AS about,
-                      setor.nome_setor AS sector
+                      USER.id_user AS id,
+                      USER.name,
+                      USER.about,
+                      SECTOR.sector
                   FROM
-                      tb_usuario USER
-                  INNER JOIN tb_setor setor ON
-                      USER.setor_usuario = setor.id_setor
+                      tb_users USER
+                  INNER JOIN tb_sector SECTOR ON
+                      USER.sector = SECTOR.id_sector
+                  WHERE USER.state = 1
                   ORDER BY
-                      USER.nome_usuario ASC`;
+                      USER.id_user ASC`;
 
   try {
     const result = await mysql.execute(query);
+    if (result.length === 0) return res.jsonNotFound();
 
     const response = {
       total: result.length,
       users: result.map((user) => user),
     };
 
-    if (result.length !== 0) return res.jsonOK(response);
-
-    return res.jsonNotFound();
+    return res.jsonOK(response);
   } catch (error) {
-    return res.send(error);
+    return res.status(404).send(error);
   }
 });
 
-router.get('/:id_usuario', async (req, res) => {
-  const { id_usuario } = req.params;
+router.get('/:id_user', checkId, async (req, res) => {
+  const { id_user } = req.params;
 
   const query = ` SELECT
-                      USER.id_usuario AS id,
-                      USER.nome_usuario AS name,
-                      USER.email_usuario AS email,
-                      USER.cpf_usuario AS cpf,
-                      USER.tel_usuario AS phone,
-                      SETOR.nome_setor AS sector,
-                      SEXO.nome_sexo AS gender
+                      USER.id_user AS id,
+                      USER.name,
+                      USER.email,
+                      USER.cpf,
+                      USER.phone,
+                      SECTOR.sector,
+                      GENDER.gender
                   FROM
-                      tb_usuario USER
-                  INNER JOIN tb_setor SETOR ON
-                      USER.setor_usuario = SETOR.id_setor
-                  INNER JOIN tb_sexo SEXO ON
-                      USER.sexo_usuario = SEXO.id_sexo
+                      tb_users USER
+                  INNER JOIN tb_sector SECTOR ON
+                      USER.sector = SECTOR.id_sector
+                  INNER JOIN tb_gender GENDER ON
+                      USER.gender = GENDER.id_gender
                   WHERE
-                      id_usuario = 1
+                      id_user = ?
                   LIMIT 1`;
 
   try {
-    const result = await mysql.execute(query, [id_usuario]);
+    const result = await mysql.execute(query, [id_user]);
+    if (result.length === 0) return res.jsonNotFound();
 
     const response = { user: result.map((user) => user) };
 
-    if (result.length !== 0) return res.jsonOK(response);
-
-    return res.jsonNotFound();
+    return res.jsonOK(response);
   } catch (error) {
     return res.status(404).send(error);
   }
 });
 
 router.post('/', validateNewUser, async (req, res) => {
-  const {
-    cpf_usuario,
-    email_usuario,
-    nome_usuario,
-    tel_usuario,
-    setor_usuario,
-    sexo_usuario,
-  } = req.body;
+  const { cpf, email, name, phone, sector, gender } = req.body;
 
-  const login = generateUsername(nome_usuario);
+  const login = generateUsername(name);
   const pass = generatePassword();
 
-  const queryEmail = 'SELECT * FROM tb_usuario WHERE email_usuario = ?';
-  const queryLogin = `INSERT INTO tb_dados_login(
-                      usuario_login,
-                      usuario_senha
+  runMailer(name, email, login, pass);
+
+  const queryEmail = ` SELECT 
+                          * 
+                      FROM 
+                          tb_users 
+                      WHERE email = ? 
+                      AND state = 1`;
+  const queryLogin = `INSERT INTO tb_login(
+                      login,
+                      password
                   )
                   VALUES(?, ?)`;
-  const queryNewUser = `INSERT INTO tb_usuario(
-                            id_usuario,
-                            cpf_usuario,
-                            email_usuario,
-                            nome_usuario,
-                            tel_usuario,
-                            setor_usuario,
-                            sexo_usuario,
-                            sobre_usuario,
-                            status_usuario
+  const queryNewUser = `INSERT INTO tb_users(
+                            id_user,
+                            cpf,
+                            email,
+                            name,
+                            phone,
+                            sector,
+                            gender
                         )
-                        VALUES(?, ?, ?, ?, ?, ?, ?, NULL, '2')`;
+                        VALUES(?, ?, ?, ?, ?, ?, ?)`;
 
   try {
-    const resultEmail = await mysql.execute(queryEmail, [email_usuario]);
+    const resultEmail = await mysql.execute(queryEmail, [email]);
     if (resultEmail.length > 0) return res.jsonConflict();
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
@@ -114,27 +117,74 @@ router.post('/', validateNewUser, async (req, res) => {
 
       await mysql.execute(queryNewUser, [
         insertId,
-        cpf_usuario,
-        email_usuario,
-        nome_usuario,
-        tel_usuario,
-        setor_usuario,
-        sexo_usuario,
+        cpf,
+        email,
+        name,
+        phone,
+        sector,
+        gender,
       ]);
 
       return res.jsonOK(null, getMessages('account.signup.success'));
     });
 
     /**
-     * procurar uma lib para envio de emails: nodemailer
+     * procurar uma lib para envio de emails: nodemailer.
+     * enviar login e senha ao email do usuário
      */
   } catch (error) {
     return res.send(error);
   }
 });
 
-router.patch('/');
+router.patch('/', checkId, async (req, res) => {
+  const { id_user, cpf, email, name, phone, sector, gender } = req.body;
 
-router.delete('/');
+  const query = ` UPDATE
+                      tb_users
+                  SET
+                      cpf = ?,
+                      email = ?,
+                      name = ?,
+                      phone = ?,
+                      sector = ?
+                  WHERE
+                      id_user = ?`;
+
+  try {
+    await mysql.execute(query, [id_user]);
+  } catch (error) {
+    return res.send(error);
+  }
+});
+
+router.delete('/', checkId, async (req, res) => {
+  const { id_user } = req.body;
+
+  const queryLogin = `  UPDATE 
+                            tb_login 
+                        SET
+                            state = 0
+                        WHERE id_user = ?`;
+
+  const queryUsers = ` UPDATE 
+                          tb_users 
+                      SET
+                          state = 0
+                      WHERE id_user = ?`;
+
+  try {
+    await mysql.execute(queryLogin, [id_user]);
+    await mysql.execute(queryUsers, [id_user]);
+
+    return res.jsonOK(null, 'Deletado com sucesso.');
+  } catch (error) {
+    return res.send(error);
+  }
+
+  /**
+   * documentar o metodo DELETE
+   */
+});
 
 module.exports = router;
