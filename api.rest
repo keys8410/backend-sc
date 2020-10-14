@@ -55,3 +55,13 @@ Content-Type: {{contentType}}
 {
   "id_user": 1
 }
+
+### /auth login user
+
+POST {{baseUrl}}/auth/sign-in
+Content-Type: {{contentType}}
+
+{
+  "login": "marcos.lelis",
+  "pass": "v777g9q7" 
+}

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
-const tokenPrivateKey = process.env.JWT_TOKEN_PRIVATE_KEY;
+const tokenPrivateKey = process.env.JWT_KEY;
 
 const options = { expiresIn: '30 minutes' };
 

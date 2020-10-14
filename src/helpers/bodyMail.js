@@ -159,7 +159,7 @@ const bodyMail = (name, login, pass) => {
                                                   <td align="left" style="padding: 25px 0 0 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Bem-vindo colaborador, ${name}</td>
                                               </tr>
                                               <tr>
-                                                  <td align="left" style="padding: 20px 0 0 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">As suas credenciais de acesso serão:</td>
+                                                  <td align="left" style="padding: 20px 0 0 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">As suas credenciais de acesso são:</td>
                                               </tr>
                                               <tr>
                                                   <td align="left" style="padding: 20px 0 0 0; font-size: 16px; line-height: 25px; font-family: Helvetica, Arial, sans-serif; color: #666666;" class="padding-copy">Login: ${login}</td>

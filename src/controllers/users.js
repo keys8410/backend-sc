@@ -2,9 +2,11 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mysql = require('../config/mysql');
+
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
 const { validateNewUser } = require('../validators/users');
+
 const checkId = require('../middlewares/checkId');
 const runMailer = require('../helpers/mailer');
 
