@@ -2,17 +2,16 @@
 
 @contentType = application/json
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxMCwic2VjdG9yIjoxLCJpYXQiOjE2MDI3MTgyNDEsImV4cCI6MTYwMjcyMDA0MX0.FVctWBG9l_GtZvPe_5J4HePps-wd9xC7utZorKEbKb0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxNCwic2VjdG9yIjoyLCJpYXQiOjE2MDI4MDE4NDgsImV4cCI6MTYwMjgwMzY0OH0.2Mt7t-jjoKHnsHlFgs59zlFcGX4AjIMR_FPsDnAXYWo
 
-
-### /auth/sign-in login user
+### /auth/sign-in login user - coord (2)
 
 POST {{baseUrl}}/auth/sign-in
 Content-Type: {{contentType}}
 
 {
-  "login": "marcos.lelis",
-  "pass": "v777g9q7" 
+  "login": "yan.garcia",
+  "pass": "9v68t7yv" 
 }
 
 
@@ -25,16 +24,18 @@ Authorization: Bearer {{token}}
 ### /users unique user
 GET {{baseUrl}}/users/1
 Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 
 ### /users add user
 POST {{baseUrl}}/users
 Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
-  "cpf": "000.000.000-22",
-  "email": "coord@user.com",
-  "name": "Coord User",
+  "cpf": "000.020.000-13",
+  "email": "ecommerce8410@gmail.com",
+  "name": "Yan Almeida Garcia",
   "phone": "(61) 14444-4444",
   "sector": 2,
   "gender": 1
@@ -43,14 +44,13 @@ Content-Type: {{contentType}}
 
 ### /users delete user
 
-PATCH {{baseUrl}}/users
+PUT {{baseUrl}}/users
 Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
-  "id": 29,
-  "cpf": "000.256.614-55",
+  "cpf": "000.020.000-13",
   "email": "yasdfsna@gsadefasdfarcia.com",
-  "name": "Yan Almeida",
   "phone": "(61) 14444-4444",
   "sector": 1,
   "gender": 1
@@ -61,8 +61,9 @@ Content-Type: {{contentType}}
 
 DELETE {{baseUrl}}/users
 Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 {
-  "id_user": 1
+  "id_user": 3
 }
 

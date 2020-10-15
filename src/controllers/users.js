@@ -3,19 +3,15 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mysql = require('../config/mysql');
 
+const SALTS = 10;
+
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
 const { validateNewUser } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
-const runMailer = require('../helpers/mailer');
+const { sendAccessUser } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
-
-const SALTS = 10;
-
-router.get('/send', (req, res, next) => {
-  res.status(202).send('teste');
-});
 
 router.get('/', checkAuthCoord, async (req, res) => {
   const query = ` SELECT
@@ -46,7 +42,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
   }
 });
 
-router.get('/:id_user', checkId, async (req, res) => {
+router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   const { id_user } = req.params;
 
   const query = ` SELECT
@@ -79,13 +75,13 @@ router.get('/:id_user', checkId, async (req, res) => {
   }
 });
 
-router.post('/', validateNewUser, async (req, res) => {
+router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
   const { cpf, email, name, phone, sector, gender } = req.body;
 
   const login = generateUsername(name);
   const pass = generatePassword();
 
-  runMailer(name, email, login, pass);
+  sendAccessUser(name, email, login, pass);
 
   const queryEmail = ` SELECT 
                           * 
@@ -140,28 +136,27 @@ router.post('/', validateNewUser, async (req, res) => {
   }
 });
 
-router.patch('/', checkId, async (req, res) => {
-  const { id_user, cpf, email, name, phone, sector, gender } = req.body;
+router.put('/', checkAuthCoord, async (req, res) => {
+  const { cpf, email, phone, sector, gender } = req.body;
 
   const query = ` UPDATE
                       tb_users
                   SET
-                      cpf = ?,
                       email = ?,
-                      name = ?,
                       phone = ?,
-                      sector = ?
+                      sector = ?,
+                      gender = ?
                   WHERE
-                      id_user = ?`;
+                      cpf = ?`;
 
   try {
-    await mysql.execute(query, [id_user]);
+    await mysql.execute(query, [email, phone, sector, gender, cpf]);
   } catch (error) {
     return res.send(error);
   }
 });
 
-router.delete('/', checkId, async (req, res) => {
+router.delete('/', checkAuthCoord, checkId, async (req, res) => {
   const { id_user } = req.body;
 
   const queryLogin = `  UPDATE 
@@ -170,11 +165,11 @@ router.delete('/', checkId, async (req, res) => {
                             state = 0
                         WHERE id_user = ?`;
 
-  const queryUsers = ` UPDATE 
-                          tb_users 
-                      SET
-                          state = 0
-                      WHERE id_user = ?`;
+  const queryUsers = `  UPDATE 
+                            tb_users 
+                        SET
+                            state = 0
+                        WHERE id_user = ?`;
 
   try {
     await mysql.execute(queryLogin, [id_user]);
