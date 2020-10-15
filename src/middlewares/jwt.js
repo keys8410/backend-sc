@@ -1,4 +1,5 @@
 const { verifyJwt, getTokenFromHeaders } = require('../helpers/jwt');
+const SECTOR_CONFIG = require('../config/sector');
 
 const checkJwt = (req, res, next) => {
   // /auth/sign-in; /auth/sign-up >> rotas a serem excluidas da verificação
@@ -19,9 +20,24 @@ const checkJwt = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error);
     return res.jsonUnauthorized(null, 'Invalid token - catch');
   }
 };
 
-module.exports = checkJwt;
+const checkAuthCoord = async (req, res, next) => {
+  const token = getTokenFromHeaders(req.headers);
+  if (!token) return res.jsonUnauthorized(null, 'Invalid token - token');
+
+  try {
+    const decoded = verifyJwt(token);
+
+    if (SECTOR_CONFIG.coord !== decoded.sector)
+      return res.jsonUnauthorized(null, 'Invalid token - sector');
+
+    next();
+  } catch (error) {
+    return res.jsonUnauthorized(null, 'Invalid token - expired');
+  }
+};
+
+module.exports = { checkAuthCoord };

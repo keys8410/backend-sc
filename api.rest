@@ -2,14 +2,24 @@
 
 @contentType = application/json
 
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxMCwic2VjdG9yIjoxLCJpYXQiOjE2MDI3MTgyNDEsImV4cCI6MTYwMjcyMDA0MX0.FVctWBG9l_GtZvPe_5J4HePps-wd9xC7utZorKEbKb0
+
+
+### /auth/sign-in login user
+
+POST {{baseUrl}}/auth/sign-in
+Content-Type: {{contentType}}
+
+{
+  "login": "marcos.lelis",
+  "pass": "v777g9q7" 
+}
+
 
 ### /users all users
 GET {{baseUrl}}/users
 Content-Type: {{contentType}}
-
-### send email
-GET {{baseUrl}}/users/send
-Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
 
 
 ### /users unique user
@@ -22,11 +32,11 @@ POST {{baseUrl}}/users
 Content-Type: {{contentType}}
 
 {
-  "cpf": "000.000.614-55",
-  "email": "marcospaulo3534q@gmail.com",
-  "name": "Marcos Gonçalves Lelis",
+  "cpf": "000.000.000-22",
+  "email": "coord@user.com",
+  "name": "Coord User",
   "phone": "(61) 14444-4444",
-  "sector": 1,
+  "sector": 2,
   "gender": 1
 }
 
@@ -56,12 +66,3 @@ Content-Type: {{contentType}}
   "id_user": 1
 }
 
-### /auth login user
-
-POST {{baseUrl}}/auth/sign-in
-Content-Type: {{contentType}}
-
-{
-  "login": "marcos.lelis",
-  "pass": "v777g9q7" 
-}

@@ -5,6 +5,8 @@ const mysql = require('../config/mysql');
 const { generateJwt } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
 
+router.user;
+
 router.post('/sign-in', async (req, res) => {
   const { login, pass } = req.body;
 

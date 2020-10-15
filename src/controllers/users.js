@@ -9,6 +9,7 @@ const { validateNewUser } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
 const runMailer = require('../helpers/mailer');
+const { checkAuthCoord } = require('../middlewares/jwt');
 
 const SALTS = 10;
 
@@ -16,7 +17,7 @@ router.get('/send', (req, res, next) => {
   res.status(202).send('teste');
 });
 
-router.get('/', async (req, res) => {
+router.get('/', checkAuthCoord, async (req, res) => {
   const query = ` SELECT
                       USER.id_user AS id,
                       USER.name,
