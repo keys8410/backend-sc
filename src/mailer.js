@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
-
-require('dotenv').config();
+const SMTP_CONFIG = require('./config/smtp');
 
 const options = {
   viewEngine: {
@@ -14,12 +13,12 @@ const options = {
 };
 
 const transporter = nodemailer.createTransport({
-  host: process.env.host,
-  port: process.env.port,
+  host: SMTP_CONFIG.host,
+  port: SMTP_CONFIG.port,
   secure: false,
   auth: {
-    user: process.env.user,
-    pass: process.env.pass,
+    user: SMTP_CONFIG.user,
+    pass: SMTP_CONFIG.pass,
   },
   tls: {
     rejectUnauthorized: false,
@@ -28,26 +27,12 @@ const transporter = nodemailer.createTransport({
 
 transporter.use('compile', hbs(options));
 
-const sendAccessUser = async (name, email, login, pass) => {
-  const body = {
-    name,
-    login,
-    pass,
-  };
-
-  const mailInfos = {
-    template: 'sendAccessUser',
-    context: body,
-    subject: 'Central de Suporte - Projeção',
-    from: `Central de Suporte <${SMTP_CONFIG.user}`,
-    to: email,
-  };
-
+const mailer = async (mailInfos) => {
   try {
-    await transporter.sendMail(mailInfos);
+    await transporter.mailer(mailInfos);
   } catch (error) {
     console.log(error);
   }
 };
 
-module.exports = { sendAccessUser };
+module.exports = mailer;
