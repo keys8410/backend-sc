@@ -18,8 +18,6 @@ const getValidatorError = (error, messagePath) => {
     errorMessages[key] = customMessage || message;
   });
 
-  // console.log(key, message);
-
   return errorMessages;
 };
 

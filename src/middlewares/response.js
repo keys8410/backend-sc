@@ -57,7 +57,7 @@ const jsonNotFound = function (data, message, metadata) {
 };
 
 const jsonConflict = function (data, message, metadata) {
-  const status = STATUS_CODE_SERVER_ERROR;
+  const status = STATUS_CODE_CONFLICT;
 
   message = message ? message : getMessages('response.json_conflict');
   metadata = metadata ? metadata : {};

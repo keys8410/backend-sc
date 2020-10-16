@@ -38,7 +38,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
 
     return res.jsonOK(response);
   } catch (error) {
-    return res.status(404).send(error);
+    return res.status(404).jsonBadRequest(null, { error });
   }
 });
 
@@ -71,7 +71,7 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
 
     return res.jsonOK(response);
   } catch (error) {
-    return res.status(404).send(error);
+    return res.jsonBadRequest(null, { error });
   }
 });
 
@@ -132,7 +132,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
      * enviar login e senha ao email do usuário
      */
   } catch (error) {
-    return res.send(error);
+    return res.jsonBadRequest(null, { error });
   }
 });
 
@@ -151,8 +151,10 @@ router.put('/', checkAuthCoord, async (req, res) => {
 
   try {
     await mysql.execute(query, [email, phone, sector, gender, cpf]);
+
+    return res.jsonOK(null, 'Dados alterados com sucesso.');
   } catch (error) {
-    return res.send(error);
+    return res.jsonBadRequest(null, { error });
   }
 });
 
@@ -177,7 +179,7 @@ router.delete('/', checkAuthCoord, checkId, async (req, res) => {
 
     return res.jsonOK(null, 'Deletado com sucesso.');
   } catch (error) {
-    return res.send(error);
+    return res.jsonBadRequest(null, { error });
   }
 
   /**

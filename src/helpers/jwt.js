@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const tokenPrivateKey = process.env.JWT_KEY;
 
-const options = { expiresIn: '30 minutes' };
+const options = { expiresIn: '120 minutes' };
 
 const generateJwt = (payload) => {
   return jwt.sign(payload, tokenPrivateKey, options);

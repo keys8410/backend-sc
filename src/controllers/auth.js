@@ -5,8 +5,6 @@ const mysql = require('../config/mysql');
 const { generateJwt } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
 
-router.user;
-
 router.post('/sign-in', async (req, res) => {
   const { login, pass } = req.body;
 
@@ -29,6 +27,7 @@ router.post('/sign-in', async (req, res) => {
       return res.jsonBadRequest(null, getMessages('account.signin.invalid'));
 
     const { id_user } = user[0];
+
     const resultSector = await mysql.execute(querySector, [id_user]);
 
     const token = generateJwt({ id_user, sector: resultSector[0].sector });
@@ -39,6 +38,34 @@ router.post('/sign-in', async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.jsonBadRequest(error);
+  }
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email, cpf } = req.body;
+
+  const queryEmail = `  SELECT 
+                            * 
+                        FROM 
+                            tb_users 
+                        WHERE email = ? 
+                        AND cpf = ?
+                        AND state = 1`;
+
+  try {
+    const resultEmail = await mysql.execute(queryEmail, [email, cpf]);
+    if (resultEmail.length === 0) return res.jsonBadRequest();
+
+    return res.jsonOK(email);
+  } catch (error) {
+    return res.jsonBadRequest(null, { error });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+  } catch (error) {
+    return res.jsonBadRequest(null, { error });
   }
 });
 

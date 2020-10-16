@@ -2,7 +2,7 @@
 
 @contentType = application/json
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxNCwic2VjdG9yIjoyLCJpYXQiOjE2MDI4MDE4NDgsImV4cCI6MTYwMjgwMzY0OH0.2Mt7t-jjoKHnsHlFgs59zlFcGX4AjIMR_FPsDnAXYWo
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxNCwic2VjdG9yIjoyLCJpYXQiOjE2MDI4MDQ2NzQsImV4cCI6MTYwMjgxMTg3NH0.nLw7miqlLN-XXnSjZl-hEpgXg79DOCriWZ2udggjSKc
 
 ### /auth/sign-in login user - coord (2)
 
@@ -12,6 +12,28 @@ Content-Type: {{contentType}}
 {
   "login": "yan.garcia",
   "pass": "9v68t7yv" 
+}
+
+
+### /auth/forgot-password
+
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: {{contentType}}
+
+{
+  "email": "yanalmeidagarcia@gmail.com",
+  "cpf": "000.000.000-55"
+}
+
+
+### /auth/reset-password
+
+POST {{baseUrl}}/auth/reset-password
+Content-Type: {{contentType}}
+
+{
+  "resetToken": "",
+  "cpf": "000.000.000-55"
 }
 
 
@@ -49,10 +71,10 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
-  "cpf": "000.020.000-13",
-  "email": "yasdfsna@gsadefasdfarcia.com",
+  "cpf": "000.000.000-55",
+  "email": "yanalmeidagarcia@gmail.com",
   "phone": "(61) 14444-4444",
-  "sector": 1,
+  "sector": 2,
   "gender": 1
 }
 
