@@ -27,12 +27,47 @@ const transporter = nodemailer.createTransport({
 
 transporter.use('compile', hbs(options));
 
-const mailer = async (mailInfos) => {
+const sendAccessUser = async (name, email, login, pass) => {
+  const body = {
+    name,
+    login,
+    pass,
+  };
+
+  const mailInfos = {
+    template: 'sendAccessUser',
+    context: body,
+    subject: 'Central de Suporte - Projeção',
+    from: `Central de Suporte <${SMTP_CONFIG.user}`,
+    to: email,
+  };
+
   try {
-    await transporter.mailer(mailInfos);
+    await transporter.sendMail(mailInfos);
   } catch (error) {
     console.log(error);
   }
 };
 
-module.exports = mailer;
+const sendTokenResetPass = async (email, resetToken) => {
+  const body = {
+    email,
+    resetToken,
+  };
+
+  const mailInfos = {
+    template: 'sendTokenResetPass',
+    context: body,
+    subject: 'Central de Suporte - Projeção',
+    from: `Central de Suporte <${SMTP_CONFIG.user}`,
+    to: email,
+  };
+
+  try {
+    await transporter.sendMail(mailInfos);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+module.exports = { sendAccessUser, sendTokenResetPass };
