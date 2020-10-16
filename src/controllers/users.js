@@ -81,8 +81,6 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
   const login = generateUsername(name);
   const pass = generatePassword();
 
-  sendAccessUser(name, email, login, pass);
-
   const queryEmail = ` SELECT 
                           * 
                       FROM 
@@ -124,13 +122,10 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
         gender,
       ]);
 
+      sendAccessUser(name, email, login, pass);
+
       return res.jsonOK(null, getMessages('account.signup.success'));
     });
-
-    /**
-     * procurar uma lib para envio de emails: nodemailer.
-     * enviar login e senha ao email do usuário
-     */
   } catch (error) {
     return res.jsonBadRequest(null, { error });
   }
