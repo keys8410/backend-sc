@@ -2,8 +2,11 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mysql = require('../config/mysql');
-const { generateJwt } = require('../helpers/jwt');
+
+const { generatePassword } = require('../helpers/generate');
+const { generateJwt, verifyJwt, generateJwtForgot } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
+const { sendTokenResetPass, sendNewPassword } = require('../mailer');
 
 router.post('/sign-in', async (req, res) => {
   const { login, pass } = req.body;
@@ -56,16 +59,70 @@ router.post('/forgot-password', async (req, res) => {
     const resultEmail = await mysql.execute(queryEmail, [email, cpf]);
     if (resultEmail.length === 0) return res.jsonBadRequest();
 
-    return res.jsonOK(email);
+    const resetToken = generateJwtForgot({ email, cpf });
+
+    sendTokenResetPass(email, resetToken);
+
+    return res.jsonOK();
   } catch (error) {
+    console.log(error);
     return res.jsonBadRequest(null, { error });
   }
 });
 
 router.post('/reset-password', async (req, res) => {
+  const { cpf, resetToken } = req.body;
+
+  const queryCpf = `SELECT
+                        id_user,
+                        name
+                    FROM
+                        tb_users
+                    WHERE
+                        cpf = ?
+                    AND state = 1`;
+  const queryLogin = `SELECT
+                          login
+                      FROM
+                          tb_login
+                      WHERE
+                          id_user = ?
+                      AND state = 1`;
+  const queryResetPass = `UPDATE
+                              tb_login
+                          SET
+                              password = ?
+                          WHERE
+                              id_user = ?`;
+
+  const decoded = verifyJwt(resetToken);
+  if (cpf !== decoded.cpf) return res.jsonUnauthorized(null, 'Invalid token');
+
   try {
+    const SALTS = 10;
+
+    const resultCpf = await mysql.execute(queryCpf, [cpf]);
+    const { id_user, name } = resultCpf[0];
+
+    const newPass = generatePassword();
+    bcrypt.hash(newPass, SALTS, async (error, hashPass) => {
+      if (error) res.jsonBadRequest(error);
+
+      await mysql.execute(queryResetPass, [hashPass, id_user]);
+    });
+
+    const resultLogin = await mysql.execute(queryLogin, [id_user]);
+    const { login } = resultLogin[0];
+
+    sendNewPassword(name, decoded.email, login, newPass);
+
+    return res.jsonOK(
+      null,
+      `Dados de acesso enviados no email ${decoded.email}`,
+    );
   } catch (error) {
-    return res.jsonBadRequest(null, { error });
+    console.log(error);
+    return res.jsonBadRequest();
   }
 });
 

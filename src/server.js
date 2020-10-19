@@ -4,12 +4,10 @@ const http = require('http');
 const app = require('./index');
 const port = process.env.PORT;
 const server = http.createServer(app);
-const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
 server.listen(port);
 
-app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: false })); // apenas dados simples
 app.use(bodyParser.json()); // json de entrada no body
 

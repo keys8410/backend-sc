@@ -2,7 +2,21 @@
 
 @contentType = application/json
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoxNCwic2VjdG9yIjoyLCJpYXQiOjE2MDI4MDQ2NzQsImV4cCI6MTYwMjgxMTg3NH0.nLw7miqlLN-XXnSjZl-hEpgXg79DOCriWZ2udggjSKc
+@tokenCoord = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDMwNDk0NDgsImV4cCI6MTYwMzA1NjY0OH0.KzpVxBP_dDtd5gG90BF4DSmCplSJNXVd4kq_cfwd8L4
+
+@resetToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InlhbmFsbWVpZGFnYXJjaWFAZ21haWwuY29tIiwiY3BmIjoiMDAwLjAyMC4wMDAtMTMiLCJpYXQiOjE2MDMwODQ2MTAsImV4cCI6MTYwMzA4NTUxMH0.BPQc-S6cHd5BH5fRqmScee77tdOa5n72KBPyWxg1E_I
+
+
+### /auth/sign-in login user - coord (1)
+
+POST {{baseUrl}}/auth/sign-in
+Content-Type: {{contentType}}
+
+{
+  "login": "yan.andrade",
+  "pass": "jhderpsa" 
+}
+
 
 ### /auth/sign-in login user - coord (2)
 
@@ -10,9 +24,11 @@ POST {{baseUrl}}/auth/sign-in
 Content-Type: {{contentType}}
 
 {
-  "login": "yan.garcia",
-  "pass": "9v68t7yv" 
+  "login": "yan.garcia-803",
+  "pass": "ry2tyqsq" 
 }
+
+
 
 
 ### /auth/forgot-password
@@ -22,7 +38,7 @@ Content-Type: {{contentType}}
 
 {
   "email": "yanalmeidagarcia@gmail.com",
-  "cpf": "000.000.000-55"
+  "cpf": "000.020.000-13"
 }
 
 
@@ -32,31 +48,33 @@ POST {{baseUrl}}/auth/reset-password
 Content-Type: {{contentType}}
 
 {
-  "resetToken": "",
-  "cpf": "000.000.000-55"
+  "resetToken": "{{resetToken}}",
+  "cpf": "000.020.000-13"
 }
+
+
 
 
 ### /users all users
 GET {{baseUrl}}/users
 Content-Type: {{contentType}}
-Authorization: Bearer {{token}}
+Authorization: Bearer {{tokenCoord}}
 
 
 ### /users unique user
 GET {{baseUrl}}/users/1
 Content-Type: {{contentType}}
-Authorization: Bearer {{token}}
+Authorization: Bearer {{tokenCoord}}
 
 
 ### /users add user
 POST {{baseUrl}}/users
 Content-Type: {{contentType}}
-Authorization: Bearer {{token}}
+Authorization: Bearer {{tokenCoord}}
 
 {
   "cpf": "000.020.000-13",
-  "email": "ecommerce8410@gmail.com",
+  "email": "yanalmeidagarcia@gmail.com",
   "name": "Yan Almeida Garcia",
   "phone": "(61) 14444-4444",
   "sector": 2,
@@ -68,7 +86,7 @@ Authorization: Bearer {{token}}
 
 PUT {{baseUrl}}/users
 Content-Type: {{contentType}}
-Authorization: Bearer {{token}}
+Authorization: Bearer {{tokenCoord}}
 
 {
   "cpf": "000.000.000-55",
@@ -83,9 +101,9 @@ Authorization: Bearer {{token}}
 
 DELETE {{baseUrl}}/users
 Content-Type: {{contentType}}
-Authorization: Bearer {{token}}
+Authorization: Bearer {{tokenCoord}}
 
 {
-  "id_user": 3
+  "id_user": 15
 }
 

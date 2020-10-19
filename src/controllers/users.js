@@ -121,11 +121,11 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
         sector,
         gender,
       ]);
-
-      sendAccessUser(name, email, login, pass);
-
-      return res.jsonOK(null, getMessages('account.signup.success'));
     });
+
+    sendAccessUser(name, email, login, pass);
+
+    return res.jsonOK(null, getMessages('account.signup.success'));
   } catch (error) {
     return res.jsonBadRequest(null, { error });
   }

@@ -70,4 +70,26 @@ const sendTokenResetPass = async (email, resetToken) => {
   }
 };
 
-module.exports = { sendAccessUser, sendTokenResetPass };
+const sendNewPassword = async (name, email, login, newPass) => {
+  const body = {
+    name,
+    email,
+    login,
+    newPass,
+  };
+
+  const mailInfos = {
+    template: 'sendNewPassword',
+    context: body,
+    subject: 'Central de Suporte - Projeção',
+    from: `Central de Suporte <${SMTP_CONFIG.user}`,
+    to: email,
+  };
+
+  try {
+    await transporter.sendMail(mailInfos);
+  } catch (error) {
+    console.log(error);
+  }
+};
+module.exports = { sendAccessUser, sendTokenResetPass, sendNewPassword };

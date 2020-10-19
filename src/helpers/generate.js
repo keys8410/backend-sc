@@ -7,7 +7,9 @@ const generateUsername = (string) => {
   const user = splited;
   const newUser = `${user[0]}.${user[length - 1]}`;
 
-  return newUser.toLowerCase();
+  const randomNumber = Math.floor(Math.random() * 999) + 1;
+
+  return `${newUser.toLowerCase()}-${randomNumber}`;
 };
 
 const generatePassword = () => {

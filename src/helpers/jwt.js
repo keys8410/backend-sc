@@ -19,8 +19,14 @@ const getTokenFromHeaders = (headers) => {
   return token ? token.slice(7, token.length) : null;
 };
 
+const generateJwtForgot = (payload) => {
+  const expiresIn = { expiresIn: '15 minutes' };
+  return jwt.sign(payload, tokenPrivateKey, expiresIn);
+};
+
 module.exports = {
   verifyJwt,
   generateJwt,
   getTokenFromHeaders,
+  generateJwtForgot,
 };
