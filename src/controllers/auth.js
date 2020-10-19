@@ -35,9 +35,13 @@ router.post('/sign-in', async (req, res) => {
 
     const token = generateJwt({ id_user, sector: resultSector[0].sector });
 
-    return res.jsonOK({ id_user }, getMessages('account.signin.success'), {
-      token,
-    });
+    return res.jsonOK(
+      { id_user, sector: resultSector[0].sector },
+      getMessages('account.signin.success'),
+      {
+        token,
+      },
+    );
   } catch (error) {
     console.log(error);
     return res.jsonBadRequest(error);
