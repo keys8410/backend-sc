@@ -123,7 +123,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
       ]);
     });
 
-    sendAccessUser(name, email, login, pass);
+    sendAccessUser(email, { name, login, pass });
 
     return res.jsonOK(null, getMessages('account.signup.success'));
   } catch (error) {

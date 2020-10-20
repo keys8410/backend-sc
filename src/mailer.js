@@ -27,13 +27,7 @@ const transporter = nodemailer.createTransport({
 
 transporter.use('compile', hbs(options));
 
-const sendAccessUser = async (name, email, login, pass) => {
-  const body = {
-    name,
-    login,
-    pass,
-  };
-
+const sendAccessUser = async (email, body) => {
   const mailInfos = {
     template: 'sendAccessUser',
     context: body,
@@ -49,12 +43,7 @@ const sendAccessUser = async (name, email, login, pass) => {
   }
 };
 
-const sendTokenResetPass = async (email, resetToken) => {
-  const body = {
-    email,
-    resetToken,
-  };
-
+const sendTokenResetPass = async (email, body) => {
   const mailInfos = {
     template: 'sendTokenResetPass',
     context: body,
@@ -70,14 +59,7 @@ const sendTokenResetPass = async (email, resetToken) => {
   }
 };
 
-const sendNewPassword = async (name, email, login, newPass) => {
-  const body = {
-    name,
-    email,
-    login,
-    newPass,
-  };
-
+const sendNewPassword = async (email, body) => {
   const mailInfos = {
     template: 'sendNewPassword',
     context: body,

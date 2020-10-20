@@ -65,7 +65,7 @@ router.post('/forgot-password', async (req, res) => {
 
     const resetToken = generateJwtForgot({ email, cpf });
 
-    sendTokenResetPass(email, resetToken);
+    sendTokenResetPass(email, { resetToken });
 
     return res.jsonOK();
   } catch (error) {
@@ -118,7 +118,7 @@ router.post('/reset-password', async (req, res) => {
     const resultLogin = await mysql.execute(queryLogin, [id_user]);
     const { login } = resultLogin[0];
 
-    sendNewPassword(name, decoded.email, login, newPass);
+    sendNewPassword(decoded.email, { name, login, newPass });
 
     return res.jsonOK(
       null,
