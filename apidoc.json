@@ -1,17 +1,5 @@
 {
   "name": "Support Center",
-  "version": "0.0.2",
   "description": "API Node/Express",
-  "title": "Support Center API Docs",
-  "template": {
-    "withCompare": true,
-    "withGenerator": true
-  },
-  "url": "http://localhost:3001/v1",
-  "order": ["GetUser", "PostUser"],
-  "generator": {
-    "version": "0.1.0",
-    "time": "2014-11-28T14:54:41.801Z"
-  },
-  "apidoc": "0.1.0"
+  "title": "Support Center API Docs"
 }
