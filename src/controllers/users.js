@@ -22,7 +22,7 @@ const { checkAuthCoord } = require('../middlewares/jwt');
  *  @apiPermission {Coord}
  *
  *  @apiSuccessExample {json} Success
- *    HTTP/1.1 200 OK
+ *    HTTP/1.1 (200) OK
  *    {
  *      "message": "Requisição efetuada com sucesso.",
  *      "data": {
@@ -86,7 +86,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
  *  @apiParam {Number} id funcionário.
  *
  *  @apiSuccessExample {json} Success
- *   HTTP/1.1 200 OK
+ *   HTTP/1.1 (200) OK
  *   {
  *     "message": "Requisição efetuada com sucesso.",
  *     "data": {
@@ -181,7 +181,7 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
  *
  *
  *  @apiSuccessExample {json} Válido
-HTTP/1.1 200 OK
+HTTP/1.1 (200) OK
 {
   "message": "Cadastro efetuado com sucesso.",
   "data": null,
@@ -191,7 +191,7 @@ HTTP/1.1 200 OK
  *
  *
  *  @apiSuccessExample {json} Inválido
-HTTP/1.1 400 OK
+HTTP/1.1 (400) OK
 {
   "message": "Requisição inválida.",
   "data": null,
@@ -304,7 +304,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
  *
  *
  *  @apiSuccessExample {json} Válido
-HTTP/1.1 200 OK
+HTTP/1.1 (200) OK
 {
   "message": "Dados alterados com sucesso.",
   "data": null,
@@ -314,7 +314,7 @@ HTTP/1.1 200 OK
  *
  *
  *  @apiSuccessExample {json} Inválido
-HTTP/1.1 400 OK
+HTTP/1.1 (400) OK
 {
   "message": "Requisição inválida.",
   "data": null,
