@@ -13,12 +13,8 @@ const rules = {
   phone: Joi.string()
     .pattern(new RegExp(/(\(\d{2}\)\s)(\d{4,5}\-\d{4})/))
     .required(),
-  sector: Joi.string()
-    .pattern(new RegExp(/^\[0-9]/))
-    .required(),
-  gender: Joi.string()
-    .pattern(new RegExp(/^\[0-9]/))
-    .required(),
+  sector: Joi.required(),
+  gender: Joi.required(),
 };
 
 const validateNewUser = (req, res, next) => {
@@ -46,7 +42,7 @@ const validateNewUser = (req, res, next) => {
   );
 
   if (error) {
-    const messages = getValidatorError(error, 'users.post');
+    const messages = getValidatorError(error, 'users');
 
     return res.jsonBadRequest(null, null, { error: messages });
   }
@@ -54,4 +50,25 @@ const validateNewUser = (req, res, next) => {
   next();
 };
 
-module.exports = { validateNewUser };
+const validatePutUser = (req, res, next) => {
+  const { email, phone, sector, gender } = req.body;
+
+  const schema = Joi.object({
+    email: rules.email,
+    phone: rules.phone,
+    sector: rules.sector,
+    gender: rules.gender,
+  });
+
+  const { error } = schema.validate({ email, phone, sector, gender }, options);
+
+  if (error) {
+    const messages = getValidatorError(error, 'users');
+
+    return res.jsonBadRequest(null, null, { error: messages });
+  }
+
+  next();
+};
+
+module.exports = { validateNewUser, validatePutUser };

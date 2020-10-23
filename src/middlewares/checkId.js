@@ -8,7 +8,7 @@ const checkId = async (req, res, next) => {
   console.log(`*** id_user => ${id_user}`);
 
   const resultId = await mysql.execute(queryId, [id_user]);
-  if (resultId.length === 0) return res.jsonNotFound();
+  if (resultId.length === 0) return res.jsonNotFound(null);
 
   next();
 };

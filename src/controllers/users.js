@@ -7,7 +7,7 @@ const SALTS = 10;
 
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
-const { validateNewUser } = require('../validators/users');
+const { validateNewUser, validatePutUser } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
 const { sendAccessUser } = require('../mailer');
@@ -76,7 +76,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
 });
 
 /**
- *  @api {get} /users/:id_user 👤 Unique user
+ *  @api {get} /users/id_user 👤 Unique user
  *  @apiVersion 0.1.0
  *  @apiName List One
  *  @apiGroup Users
@@ -151,21 +151,21 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
  *  @apiDescription Cria um novo funcionário
  *  @apiPermission {Coord}
  * 
- *  @apiParam {string} Nome                Nome do funcionário.
- *  @apiParam {number} Setor               Setor do funcionário (definirá as permissões dentro da aplicação).
- *  @apiParam {string} E-mail              E-mail do(s) funcionário(s).
+ *  @apiParam {string} name                Nome do funcionário.
+ *  @apiParam {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
+ *  @apiParam {string} Email              E-mail do(s) funcionário(s).
  *  @apiParam {string} CPF                 CPF (único por funcionário).
- *  @apiParam {number} Sexo                Sexo do funcionário.
- *  @apiParam {string} Celular             Telefone de contato dos funcionários.
+ *  @apiParam {number} Gender                Sexo do funcionário.
+ *  @apiParam {string} Phone             Telefone de contato dos funcionários.
  *  
  *  @apiParamExample {json} Formato de requisição válido
 {
-"cpf_usuario": "000.000.000-00",
-"email_usuario": "yan@almeida.com",
-"nome_usuario": "Yan Almeida Garcia",
-"tel_usuario": "(00) 91234-5678",
-"setor_usuario": 1,
-"sexo_usuario": 1
+  "cpf": "000.000.251-55",
+  "email": "yanalmeidagarcia@gmail.com",
+  "name": "Yan Almeida Garcia",
+  "phone": "(61) 14444-4",
+  "sector": 2,
+  "gender": 1
 }
  *
  *
@@ -244,7 +244,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (resultEmail.length > 0) return res.jsonConflict();
+    if (resultEmail.length > 0) return res.jsonConflict(null);
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
       if (error) res.jsonBadRequest(error);
@@ -264,17 +264,87 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
     sendAccessUser(email, { name, login, pass });
 
-    return res.jsonOK(null, getMessages('account.signup.success'));
+    return res.jsonOK(null, getMessages('users.post.success'));
   } catch (error) {
     return res.jsonBadRequest(null, { error });
   }
 });
 
-router.put('/:id_user', checkAuthCoord, checkId, async (req, res) => {
-  const { id_user } = req.params;
-  const { email, phone, sector, gender } = req.body;
+/**
+ *  @api {put} /users 👤 Edit user
+ *  @apiVersion 0.1.0
+ *  @apiName Edit user 
+ *  @apiGroup Users
+ *  @apiDescription Altera os dados de um funcionário
+ *  @apiPermission {Coord}
+ *
+ * 
+ *  @apiParam {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
+ *  @apiParam {string} Email              E-mail do(s) funcionário(s).
+ *  @apiParam {number} Gender                Sexo do funcionário.
+ *  @apiParam {string} Phone             Telefone de contato dos funcionários.
+ *  
+ *  @apiParamExample {json} Formato de requisição válido
+{
+  "email": "yanalmeidagarcia@gmail.com",
+  "phone": "(61) 14444-4444",
+  "sector": 2,
+  "gender": 1
+}
 
-  const query = ` UPDATE
+ *
+ *
+ *  @apiParamExample {json} Formato de requisição inválido
+{
+  "email": "yanalmeidagarciagmail",
+  "phone": "(61) 14444-4",
+  "sector": "a",
+  "gender": "b"
+}
+ *
+ *
+ *  @apiSuccessExample {json} Válido
+HTTP/1.1 200 OK
+{
+  "message": "Dados alterados com sucesso.",
+  "data": null,
+  "metadata": {},
+  "status": 200
+}
+ *
+ *
+ *  @apiSuccessExample {json} Inválido
+HTTP/1.1 400 OK
+{
+  "message": "Requisição inválida.",
+  "data": null,
+  "metadata": {
+    "error": {
+      "email": "Email não é válido.",
+      "phone": "Telefone não é válido.",
+      "sector": "Setor não é válido.",
+      "gender": "Sexo não é válido."
+    }
+  },
+  "status": 400
+}
+ * 
+ *
+ *  @apiUse DataConflict
+ *  @apiUse UnauthorizedJwtExpired
+ *  @apiUse UnauthorizedSector
+ *  @apiUse UnauthorizedToken
+ */
+router.put(
+  '/:id_user',
+  checkAuthCoord,
+  checkId,
+  validatePutUser,
+  async (req, res) => {
+    const { id_user } = req.params;
+    const { email, phone, sector, gender } = req.body;
+
+    const query = ` UPDATE
                       tb_users
                   SET
                       email = ?,
@@ -282,18 +352,29 @@ router.put('/:id_user', checkAuthCoord, checkId, async (req, res) => {
                       sector = ?,
                       gender = ?
                   WHERE
-                      cpf = ?`;
+                      id_user = ?
+                  AND state = 1`;
+    const queryEmail = `  SELECT 
+                              * 
+                          FROM 
+                              tb_users 
+                          WHERE email = ? 
+                          AND state = 1`;
 
-  try {
-    await mysql.execute(query, [email, phone, sector, gender, id_user]);
+    try {
+      const resultEmail = await mysql.execute(queryEmail, [email]);
+      if (resultEmail.length > 0) return res.jsonConflict(null);
 
-    return res.jsonOK(null, 'Dados alterados com sucesso.');
-  } catch (error) {
-    return res.jsonBadRequest(null, { error });
-  }
-});
+      await mysql.execute(query, [email, phone, sector, gender, id_user]);
 
-router.delete('/', checkAuthCoord, checkId, async (req, res) => {
+      return res.jsonOK(null, getMessages('users.put.success'));
+    } catch (error) {
+      return res.jsonBadRequest(null, { error });
+    }
+  },
+);
+
+router.delete('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   const { id_user } = req.body;
 
   const queryLogin = `  UPDATE 

@@ -6,7 +6,8 @@
  *  @apiErrorExample {json} Not found
 HTTP/1.1 (404) Not Found
 {
-  "message": "Não encontrado."
+  "message": "Não encontrado.",
+  "data": null,
   "metadata": {},
   "status": 404
 }
@@ -20,7 +21,8 @@ HTTP/1.1 (404) Not Found
  *  @apiErrorExample {json} Conflict
 HTTP/1.1 (409) Data Conflict
 {
-  "message": "Dado(s) já cadastrado(s)."
+  "message": "Dado(s) já cadastrado(s).",
+  "data": null,
   "metadata": {},
   "status": 409
 }
