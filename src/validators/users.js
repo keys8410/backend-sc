@@ -13,8 +13,12 @@ const rules = {
   phone: Joi.string()
     .pattern(new RegExp(/(\(\d{2}\)\s)(\d{4,5}\-\d{4})/))
     .required(),
-  sector: Joi.number().required(),
-  gender: Joi.number().required(),
+  sector: Joi.string()
+    .pattern(new RegExp(/^\[0-9]/))
+    .required(),
+  gender: Joi.string()
+    .pattern(new RegExp(/^\[0-9]/))
+    .required(),
 };
 
 const validateNewUser = (req, res, next) => {
@@ -42,10 +46,7 @@ const validateNewUser = (req, res, next) => {
   );
 
   if (error) {
-    const messages = getValidatorError(
-      error,
-      'account.signin.all.any.required',
-    );
+    const messages = getValidatorError(error, 'users.post');
 
     return res.jsonBadRequest(null, null, { error: messages });
   }

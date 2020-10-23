@@ -15,12 +15,31 @@
   "account.signin.password.string.empty": "Senha obrigatória.",
   "account.signin.password.string.pattern.base": "Senha deve conter entre 3 a 30 caracteres.",
 
-  "account.signup.success": "Cadastro efetuado com sucesso.",
-  "account.signup.email_exists": "Email já cadastrado.",
-  "account.signup.email.string.empty": "Email obrigatório.",
-  "account.signup.email.any.required": "Email obrigatório.",
-  "account.signup.email.string.email": "Email não é válido.",
-  "account.signup.password.string.empty": "Senha obrigatória.",
-  "account.signup.password.string.pattern.base": "Senha deve conter entre 3 a 30 caracteres.",
-  "account.signup.password_confirmation.any.required": "Confirmação de senha é obrigatório"
+  "users.post.success": "Cadastro efetuado com sucesso.",
+
+  "users.post.email_exists": "Email já cadastrado.",
+  "users.post.email.string.empty": "Email obrigatório.",
+  "users.post.email.any.required": "Email obrigatório.",
+  "users.post.email.string.email": "Email não é válido.",
+
+  "users.post.cpf_exists": "CPF já cadastrado.",
+  "users.post.cpf.string.empty": "CPF obrigatório.",
+  "users.post.cpf.any.required": "CPF obrigatório.",
+  "users.post.cpf.string.pattern.base": "CPF não é válido.",
+
+  "users.post.name.string.empty": "Nome obrigatório.",
+  "users.post.name.any.required": "Nome obrigatório.",
+  "users.post.name.string.pattern.base": "Nome não é válido.",
+
+  "users.post.phone.string.empty": "Telefone obrigatório.",
+  "users.post.phone.any.required": "Telefone obrigatório.",
+  "users.post.phone.string.pattern.base": "Telefone não é válido.",
+
+  "users.post.sector.string.empty": "Setor é obrigatório.",
+  "users.post.sector.any.required": "Setor é obrigatório.",
+  "users.post.sector.string.pattern.base": "Setor não é válido.",
+
+  "users.post.gender.string.empty": "Sexo é obrigatório.",
+  "users.post.gender.any.required": "Sexo é obrigatório.",
+  "users.post.gender.string.pattern.base": "Sexo não é válido."
 }

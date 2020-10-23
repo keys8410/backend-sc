@@ -1,5 +1,6 @@
 {
   "name": "Support Center",
+  "version": "0.1.0",
   "description": "API Node/Express",
   "title": "Support Center API Docs"
 }

@@ -15,7 +15,8 @@ const checkAuthCoord = (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.jsonUnauthorized(null, 'Invalid token - catch');
+    console.log(error);
+    return res.jsonUnauthorized(null, 'Invalid token - jwt expired');
   }
 };
 

@@ -2,7 +2,10 @@
 
 @contentType = application/json
 
-@tokenCoord = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDMwNDk0NDgsImV4cCI6MTYwMzA1NjY0OH0.KzpVxBP_dDtd5gG90BF4DSmCplSJNXVd4kq_cfwd8L4
+@tokenMaster = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMCwic2VjdG9yIjoxLCJpYXQiOjE2MDMzOTI0ODMsImV4cCI6MTYwMzM5OTY4M30.oFEuv2cOZBIn7W-MoDTmkSUth1sTe9gXKwAtlTv86pM
+
+@tokenCoord = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM0MDA5MjAsImV4cCI6MTYwMzQwODEyMH0.sAQKDTuCuQfVEL3jaXZN_BqrGdvj3zFPR9P5GS_9MyM
+@tokenTehc = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMCwic2VjdG9yIjoxLCJpYXQiOjE2MDMzOTI0ODMsImV4cCI6MTYwMzM5OTY4M30.oFEuv2cOZBIn7W-MoDTmkSUth1sTe9gXKwAtlTv86pM
 
 @resetToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InlhbmFsbWVpZGFnYXJjaWFAZ21haWwuY29tIiwiY3BmIjoiMDAwLjAyMC4wMDAtMTMiLCJpYXQiOjE2MDMwODQ2MTAsImV4cCI6MTYwMzA4NTUxMH0.BPQc-S6cHd5BH5fRqmScee77tdOa5n72KBPyWxg1E_I
 
@@ -73,27 +76,26 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{tokenCoord}}
 
 {
-  "cpf": "000.020.000-13",
-  "email": "yanalmeidagarcia@gmail.com",
-  "name": "Yan Almeida Garcia",
-  "phone": "(61) 14444-4444",
-  "sector": 2,
-  "gender": 1
+  "cpf": "",
+  "email": "yanalmeidagarciagmail",
+  "name": "12314",
+  "phone": "(61) 14444-4",
+  "sector": "a",
+  "gender": "b"
 }
 
 
 ### /users delete user
 
-PUT {{baseUrl}}/users
+PUT {{baseUrl}}/users/223
 Content-Type: {{contentType}}
 Authorization: Bearer {{tokenCoord}}
 
 {
-  "cpf": "000.000.000-55",
   "email": "yanalmeidagarcia@gmail.com",
   "phone": "(61) 14444-4444",
   "sector": 2,
-  "gender": 1
+  "gender": 2
 }
 
 

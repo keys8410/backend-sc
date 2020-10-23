@@ -13,6 +13,39 @@ const checkId = require('../middlewares/checkId');
 const { sendAccessUser } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
 
+/**
+ *  @api {get} /users 👥 All users
+ *  @apiVersion 0.1.0
+ *  @apiName List
+ *  @apiGroup Users
+ *  @apiDescription Retorna todos os funcionários
+ *  @apiPermission {Coord}
+ *
+ *  @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    {
+ *      "message": "Requisição efetuada com sucesso.",
+ *      "data": {
+ *        "total": n,
+ *        "users": [
+ *          {
+ *            "id": 1,
+ *            "name": "Yan Almeida Garcia",
+ *            "about": "Apenas um teste!",
+ *            "sector": "Direção"
+ *          },
+ *            ...
+ *        ]
+ *      },
+ *      "metadata": {},
+ *      "status": 200
+ *    }
+ *
+ *  @apiUse UserNotFoundError
+ *  @apiUse UnauthorizedJwtExpired
+ *  @apiUse UnauthorizedSector
+ *  @apiUse UnauthorizedToken
+ */
 router.get('/', checkAuthCoord, async (req, res) => {
   const query = ` SELECT
                       USER.id_user AS id,
@@ -42,6 +75,41 @@ router.get('/', checkAuthCoord, async (req, res) => {
   }
 });
 
+/**
+ *  @api {get} /users/:id_user 👤 Unique user
+ *  @apiVersion 0.1.0
+ *  @apiName List One
+ *  @apiGroup Users
+ *  @apiDescription Retorna um funcionário específico
+ *  @apiPermission {Coord}
+ *
+ *  @apiParam {Number} id funcionário.
+ *
+ *  @apiSuccessExample {json} Success
+ *   HTTP/1.1 200 OK
+ *   {
+ *     "message": "Requisição efetuada com sucesso.",
+ *     "data": {
+ *      "user": [
+ *        {
+ *          "id": 1,
+ *          "name": "Yan Almeida Garcia",
+ *          "email": "yan@almeida.com",
+ *          "cpf": "000.000.000-00",
+ *          "phone": "(00) 91234-5678",
+ *          "sector": "Direção"
+ *          "gender": "Não informar"
+ *        },
+ *      ]
+ *    },
+ *    "metadata": {},
+ *    "status": 200
+ *   }
+ *  @apiUse UserNotFoundError
+ *  @apiUse UnauthorizedJwtExpired
+ *  @apiUse UnauthorizedSector
+ *  @apiUse UnauthorizedToken
+ */
 router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   const { id_user } = req.params;
 
@@ -75,6 +143,77 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   }
 });
 
+/**
+ *  @api {post} /users 👤 New user 
+ *  @apiVersion 0.1.0
+ *  @apiName Create user 
+ *  @apiGroup Users
+ *  @apiDescription Cria um novo funcionário
+ *  @apiPermission {Coord}
+ * 
+ *  @apiParam {string} Nome                Nome do funcionário.
+ *  @apiParam {number} Setor               Setor do funcionário (definirá as permissões dentro da aplicação).
+ *  @apiParam {string} E-mail              E-mail do(s) funcionário(s).
+ *  @apiParam {string} CPF                 CPF (único por funcionário).
+ *  @apiParam {number} Sexo                Sexo do funcionário.
+ *  @apiParam {string} Celular             Telefone de contato dos funcionários.
+ *  
+ *  @apiParamExample {json} Formato de requisição válido
+{
+"cpf_usuario": "000.000.000-00",
+"email_usuario": "yan@almeida.com",
+"nome_usuario": "Yan Almeida Garcia",
+"tel_usuario": "(00) 91234-5678",
+"setor_usuario": 1,
+"sexo_usuario": 1
+}
+ *
+ *
+ *  @apiParamExample {json} Formato de requisição inválido
+{
+  "cpf": "",
+  "email": "yanalmeidagarciagmail",
+  "name": "12314",
+  "phone": "(61) 14444-4",
+  "sector": "a",
+  "gender": "b"
+}
+ *
+ *
+ *  @apiSuccessExample {json} Válido
+HTTP/1.1 200 OK
+{
+  "message": "Cadastro efetuado com sucesso.",
+  "data": null,
+  "metadata": {},
+  "status": 200
+}
+ *
+ *
+ *  @apiSuccessExample {json} Inválido
+HTTP/1.1 400 OK
+{
+  "message": "Requisição inválida.",
+  "data": null,
+  "metadata": {
+    "error": {
+      "cpf": "CPF obrigatório.",
+      "email": "Email não é válido.",
+      "name": "Nome não é válido.",
+      "phone": "Telefone não é válido.",
+      "sector": "Setor não é válido.",
+      "gender": "Sexo não é válido."
+    }
+  },
+  "status": 400
+}
+ * 
+ *
+ *  @apiUse DataConflict
+ *  @apiUse UnauthorizedJwtExpired
+ *  @apiUse UnauthorizedSector
+ *  @apiUse UnauthorizedToken
+ */
 router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
   const { cpf, email, name, phone, sector, gender } = req.body;
 
@@ -131,8 +270,9 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
   }
 });
 
-router.put('/', checkAuthCoord, async (req, res) => {
-  const { cpf, email, phone, sector, gender } = req.body;
+router.put('/:id_user', checkAuthCoord, checkId, async (req, res) => {
+  const { id_user } = req.params;
+  const { email, phone, sector, gender } = req.body;
 
   const query = ` UPDATE
                       tb_users
@@ -145,7 +285,7 @@ router.put('/', checkAuthCoord, async (req, res) => {
                       cpf = ?`;
 
   try {
-    await mysql.execute(query, [email, phone, sector, gender, cpf]);
+    await mysql.execute(query, [email, phone, sector, gender, id_user]);
 
     return res.jsonOK(null, 'Dados alterados com sucesso.');
   } catch (error) {
