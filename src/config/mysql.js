@@ -16,7 +16,7 @@ exports.execute = (query, params = []) => {
     pool.query(query, params, (error, result, fields) => {
       if (error) return reject(error);
 
-      return resolve(result);
+      return resolve(result.length == 1 ? result[0] : result);
     });
   });
 };
