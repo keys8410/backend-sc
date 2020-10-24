@@ -76,7 +76,7 @@ HTTP/1.1 (401) Unauthorized Decoded Sector
 /**
  * @apiDefine BearerToken
  *
- * @apiHeader {string} Authorization       Coord JWT key - token
+ * @apiHeader {string} Authorization       JWT key - token
  * @apiHeaderExample {json} Header-Example:
 {
   Authorization: Bearer {{tokenCoord}}
@@ -84,3 +84,9 @@ HTTP/1.1 (401) Unauthorized Decoded Sector
 }
 *
 */
+
+/**
+ * @apiDefine ContentType
+ *
+ * @apiHeader {string} Content-Type       application/json;
+ */

@@ -12,7 +12,7 @@ const { validateNewUser, validatePutUser } = require('../validators/users');
 const checkId = require('../middlewares/checkId');
 const { sendMail } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
-const size = require('../helpers/size');
+const { verifySize } = require('../helpers/helpers');
 
 /**
  *  @api {get} /users 👥 All users
@@ -23,6 +23,7 @@ const size = require('../helpers/size');
  *  @apiPermission Coord
  *
  *  @apiUse BearerToken
+ *  @apiUse ContentType
  *
  *  @apiSuccessExample {json} Success
  *    HTTP/1.1 (200) OK
@@ -88,6 +89,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
  *  @apiPermission Coord
  *
  *  @apiUse BearerToken
+ *  @apiUse ContentType
  *
  *  @apiParam {Number} id funcionário.
  *
@@ -139,7 +141,7 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
 
   try {
     const user = await mysql.execute(query, [id_user]);
-    if (size(user)) return res.jsonNotFound();
+    if (verifySize(user)) return res.jsonNotFound();
 
     return res.jsonOK({ user });
   } catch (error) {
@@ -157,7 +159,14 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
  *  @apiPermission Coord
  * 
  *  @apiUse BearerToken 
- *  @apiParam {int} id_user                Id do funcionário.
+ *  @apiUse ContentType
+ * 
+ *  @apiParam (Body) {string} Cpf              CPF do funcionário.
+ *  @apiParam (Body) {string} Email              E-mail do funcionário.
+ *  @apiParam (Body) {string} Name              Nome do funcionário.      
+ *  @apiParam (Body) {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
+ *  @apiParam (Body) {number} Gender                Sexo do funcionário.
+ *  @apiParam (Body) {string} Phone             Telefone de contato dos funcionário.
  *  
  *  @apiExample {json} Req válida
 {
@@ -192,7 +201,7 @@ HTTP/1.1 (200) OK
  *
  *
  *  @apiSuccessExample {json} Res inválida
-HTTP/1.1 (400) OK
+HTTP/1.1 (400) Bad Request
 {
   "message": "Requisição inválida.",
   "data": null,
@@ -245,7 +254,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (size(resultEmail)) return res.jsonConflict(null);
+    if (verifySize(resultEmail)) return res.jsonConflict(null);
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
       if (error) res.jsonBadRequest(error);
@@ -280,6 +289,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
  *  @apiPermission Coord
  *
  *  @apiUse BearerToken 
+ *  @apiUse ContentType  
  *  
  *  @apiParam {Number} id_user      Id funcionário.
  *  @apiParam (Body) {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
@@ -316,7 +326,7 @@ HTTP/1.1 (200) OK
  *
  *
  *  @apiSuccessExample {object} Res inválida
-HTTP/1.1 (400) OK
+HTTP/1.1 (400) Bad Request
 {
   "message": "Requisição inválida.",
   "data": null,
@@ -365,7 +375,7 @@ router.put(
 
     try {
       const resultEmail = await mysql.execute(queryEmail, [email]);
-      if (size(resultEmail)) return res.jsonConflict(null);
+      if (verifySize(resultEmail)) return res.jsonConflict(null);
 
       await mysql.execute(query, [email, phone, sector, gender, id_user]);
 
@@ -385,6 +395,7 @@ router.put(
  *  @apiPermission Coord
  *
  *  @apiUse BearerToken 
+ *  @apiUse ContentType
  *  
  *  @apiParam {Number} id_user      Id funcionário.
  * 

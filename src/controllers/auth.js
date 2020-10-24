@@ -8,7 +8,7 @@ const { generatePassword } = require('../helpers/generate');
 const { generateJwt, verifyJwt, generateJwtForgot } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
 const { sendMail } = require('../mailer');
-const size = require('../helpers/size');
+const { verifySize, verifyRegex } = require('../helpers/helpers');
 
 /**
  *  @api {post} /auth/sign-in ⛔ Login user
@@ -17,7 +17,8 @@ const size = require('../helpers/size');
  *  @apiGroup Auth
  *  @apiDescription Loga um usuário
  *
- *  
+ *  @apiUse ContentType
+ *   
  *  @apiParam (Body) {string} Login             Login de acesso do usuário.
  *  @apiParam (Body) {string} Pass              Senha de acesso do usuário.
  * 
@@ -27,7 +28,6 @@ const size = require('../helpers/size');
   "login": "yan.garcia-203",
   "pass": "ry9hyqbq" 
 }
-
  *
  *
  *  @apiExample {json} Req inválida
@@ -36,7 +36,7 @@ const size = require('../helpers/size');
   "pass": "ry2tyqsq" 
 }
  *
- *  @apiSuccessExample {object} Res válida
+ *  @apiSuccessExample {json} Res válida
 HTTP/1.1 (200) OK
 {
   "message": "Login efetuado com sucesso.",
@@ -45,16 +45,14 @@ HTTP/1.1 (200) OK
     "sector": 1
   },
   "metadata": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
-    eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM1NjQ2NzAsImV4cCI6MTYwMzU3MTg3MH0.
-    MRZAQE0QO_ugPI0Ejof4P4VYk4__pE7L5SxPypFPM7U"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
   },
   "status": 200
 }
  *
  *
- *  @apiSuccessExample {object} Res inválida
-HTTP/1.1 (400) OK
+ *  @apiSuccessExample {json} Res inválida
+HTTP/1.1 (400) Bad Request
 {
   "message": "Credenciais inválidas.",
   "data": null,
@@ -103,6 +101,72 @@ router.post('/sign-in', async (req, res) => {
   }
 });
 
+/**
+ *  @api {post} /auth/forgot-password ❓ Forgot password
+ *  @apiVersion 0.1.0
+ *  @apiName Forgot password 
+ *  @apiGroup Auth
+ *  @apiDescription Envial um email ao funcionário contendo o URL para resetar a senha de acesso
+ *
+ *  @apiUse ContentType
+ *  
+ *  @apiParam (Body) {string} Login              Login de acesso do usuário.
+ *  @apiParam (Body) {string} Pass              Senha de acesso do usuário.
+ *  
+ *  @apiExample {json} Req válida
+{
+  "cpf": "000.000.000-00",
+  "url": "http://localhost:3001/v1/api"
+}
+ *
+ *
+ *  @apiExample {json} Req inválida
+{
+  "cpf": "000.000.000-00",
+  "url": "http://localhost:3001/v1/api"
+}
+ *
+ *  @apiSuccessExample {json} Res válida
+HTTP/1.1 (200) OK
+{
+  "message": "Login efetuado com sucesso.",
+  "data": {
+    "id_user": 1,
+    "sector": 1
+  },
+  "metadata": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+    eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM1NjQ2NzAsImV4cCI6MTYwMzU3MTg3MH0.
+    MRZAQE0QO_ugPI0Ejof4P4VYk4__pE7L5SxPypFPM7U"
+  },
+  "status": 200
+}
+ *
+ *
+ *  @apiSuccessExample {json} Res inválida
+HTTP/1.1 (400) Bad Request
+{
+  "message": "Credenciais inválidas.",
+  "data": null,
+  "metadata": {},
+  "status": 400
+}
+ *
+ * @apiError UnauthorizedSector Decoded token com dados inválidos.
+ *
+ * @apiErrorExample {json} Sector
+HTTP/1.1 (4010) Unauthorized Decoded Sector
+{
+  "message": "Requisição inválida.",
+  "data": {
+    "error": "Url inválida."
+  },
+  "metadata": {},
+  "status": 400
+}
+
+ *
+ */
 router.post('/forgot-password', async (req, res) => {
   const { cpf, url } = req.body;
 
@@ -113,11 +177,14 @@ router.post('/forgot-password', async (req, res) => {
                         WHERE cpf = ?
                         AND state = 1`;
 
+  if (verifyRegex(/( *?https{0,1}:\/\/)/, url))
+    return res.jsonBadRequest({ error: 'Url inválida.' });
+
   try {
     const resultEmail = await mysql.execute(queryEmail, [cpf]);
     const { email, name } = resultEmail;
 
-    if (size(resultEmail)) return res.jsonBadRequest(null);
+    if (verifySize(resultEmail)) return res.jsonBadRequest(null);
 
     const resetToken = generateJwtForgot({ email, cpf });
     const rawUrl = `${url}/?key=${resetToken}`;
