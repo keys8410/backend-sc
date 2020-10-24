@@ -19,7 +19,7 @@ HTTP/1.1 (404) Not Found
  *  @apiError DataConflict Retorna um erro caso haja dado(s) já cadastrado(s).
  *
  *  @apiErrorExample {json} Conflict
-HTTP/1.1 (409) Data Conflict
+HTTP/1.1 (409) Conflict
 {
   "message": "Dado(s) já cadastrado(s).",
   "data": null,
@@ -72,3 +72,15 @@ HTTP/1.1 (401) Unauthorized Decoded Sector
   "status": 401
 }
  */
+
+/**
+ * @apiDefine BearerToken
+ *
+ * @apiHeader {string} Authorization       Coord JWT key - token
+ * @apiHeaderExample {json} Header-Example:
+{
+  Authorization: Bearer {{tokenCoord}}
+  "Authorization": "Bearer thisisjwttokenshouldbeonger"
+}
+*
+*/

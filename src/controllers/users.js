@@ -12,14 +12,17 @@ const { validateNewUser, validatePutUser } = require('../validators/users');
 const checkId = require('../middlewares/checkId');
 const { sendAccessUser } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
+const size = require('../helpers/size');
 
 /**
  *  @api {get} /users 👥 All users
  *  @apiVersion 0.1.0
  *  @apiName List
  *  @apiGroup Users
- *  @apiDescription Retorna todos os funcionários
- *  @apiPermission {Coord}
+ *  @apiDescription Retorna todos4 os funcionários
+ *  @apiPermission Coord
+ *
+ *  @apiUse BearerToken
  *
  *  @apiSuccessExample {json} Success
  *    HTTP/1.1 (200) OK
@@ -58,7 +61,8 @@ router.get('/', checkAuthCoord, async (req, res) => {
                       USER.sector = SECTOR.id_sector
                   WHERE USER.state = 1
                   ORDER BY
-                      USER.id_user ASC`;
+                      USER.id_user 
+                  ASC`;
 
   try {
     const result = await mysql.execute(query);
@@ -76,12 +80,14 @@ router.get('/', checkAuthCoord, async (req, res) => {
 });
 
 /**
- *  @api {get} /users/id_user 👤 Unique user
+ *  @api {get} /users/:id_user 👤 Unique user
  *  @apiVersion 0.1.0
  *  @apiName List One
  *  @apiGroup Users
  *  @apiDescription Retorna um funcionário específico
- *  @apiPermission {Coord}
+ *  @apiPermission Coord
+ *
+ *  @apiUse BearerToken
  *
  *  @apiParam {Number} id funcionário.
  *
@@ -132,14 +138,13 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
                   LIMIT 1`;
 
   try {
-    const result = await mysql.execute(query, [id_user]);
-    if (result.length === 0) return res.jsonNotFound();
+    const user = await mysql.execute(query, [id_user]);
+    if (size(user)) return res.jsonNotFound();
 
-    const response = { user: result.map((user) => user) };
-
-    return res.jsonOK(response);
+    return res.jsonOK({ user });
   } catch (error) {
-    return res.jsonBadRequest(null, { error });
+    console.log(error);
+    return res.jsonBadRequest({ error });
   }
 });
 
@@ -149,16 +154,12 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
  *  @apiName Create user 
  *  @apiGroup Users
  *  @apiDescription Cria um novo funcionário
- *  @apiPermission {Coord}
+ *  @apiPermission Coord
  * 
- *  @apiParam {string} name                Nome do funcionário.
- *  @apiParam {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
- *  @apiParam {string} Email              E-mail do(s) funcionário(s).
- *  @apiParam {string} CPF                 CPF (único por funcionário).
- *  @apiParam {number} Gender                Sexo do funcionário.
- *  @apiParam {string} Phone             Telefone de contato dos funcionários.
+ *  @apiUse BearerToken 
+ *  @apiParam {int} id_user                Id do funcionário.
  *  
- *  @apiParamExample {json} Formato de requisição válido
+ *  @apiExample {json} Req válida
 {
   "cpf": "000.000.251-55",
   "email": "yanalmeidagarcia@gmail.com",
@@ -169,7 +170,7 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
 }
  *
  *
- *  @apiParamExample {json} Formato de requisição inválido
+ *  @apiParamExample {json} Req inválida
 {
   "cpf": "",
   "email": "yanalmeidagarciagmail",
@@ -178,9 +179,9 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   "sector": "a",
   "gender": "b"
 }
- *
- *
- *  @apiSuccessExample {json} Válido
+*
+*
+*  @apiSuccessExample {json} Res válida
 HTTP/1.1 (200) OK
 {
   "message": "Cadastro efetuado com sucesso.",
@@ -190,7 +191,7 @@ HTTP/1.1 (200) OK
 }
  *
  *
- *  @apiSuccessExample {json} Inválido
+ *  @apiSuccessExample {json} Res inválida
 HTTP/1.1 (400) OK
 {
   "message": "Requisição inválida.",
@@ -244,7 +245,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (resultEmail.length > 0) return res.jsonConflict(null);
+    if (size(resultEmail)) return res.jsonConflict(null);
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
       if (error) res.jsonBadRequest(error);
@@ -271,30 +272,32 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 });
 
 /**
- *  @api {put} /users 👤 Edit user
+ *  @api {put} /users/:id_user 👤 Edit user
  *  @apiVersion 0.1.0
  *  @apiName Edit user 
  *  @apiGroup Users
  *  @apiDescription Altera os dados de um funcionário
- *  @apiPermission {Coord}
+ *  @apiPermission Coord
  *
- * 
- *  @apiParam {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
- *  @apiParam {string} Email              E-mail do(s) funcionário(s).
- *  @apiParam {number} Gender                Sexo do funcionário.
- *  @apiParam {string} Phone             Telefone de contato dos funcionários.
+ *  @apiUse BearerToken 
  *  
- *  @apiParamExample {json} Formato de requisição válido
+ *  @apiParam {Number} id_user      Id funcionário.
+ *  @apiParam (Body) {number} Sector               Setor do funcionário (definirá as permissões dentro da aplicação).
+ *  @apiParam (Body) {string} Email              E-mail do(s) funcionário(s).
+ *  @apiParam (Body) {number} Gender                Sexo do funcionário.
+ *  @apiParam (Body) {string} Phone             Telefone de contato dos funcionário.
+ * 
+ * 
+ *  @apiExample {json} Req válida
 {
   "email": "yanalmeidagarcia@gmail.com",
   "phone": "(61) 14444-4444",
   "sector": 2,
   "gender": 1
 }
-
  *
  *
- *  @apiParamExample {json} Formato de requisição inválido
+ *  @apiExample {json} Req inválida
 {
   "email": "yanalmeidagarciagmail",
   "phone": "(61) 14444-4",
@@ -302,8 +305,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
   "gender": "b"
 }
  *
- *
- *  @apiSuccessExample {json} Válido
+ *  @apiSuccessExample {object} Res válida
 HTTP/1.1 (200) OK
 {
   "message": "Dados alterados com sucesso.",
@@ -313,7 +315,7 @@ HTTP/1.1 (200) OK
 }
  *
  *
- *  @apiSuccessExample {json} Inválido
+ *  @apiSuccessExample {object} Res inválida
 HTTP/1.1 (400) OK
 {
   "message": "Requisição inválida.",
@@ -329,7 +331,7 @@ HTTP/1.1 (400) OK
   "status": 400
 }
  * 
- *
+ *  @apiUse UserNotFoundError
  *  @apiUse DataConflict
  *  @apiUse UnauthorizedJwtExpired
  *  @apiUse UnauthorizedSector
@@ -363,7 +365,7 @@ router.put(
 
     try {
       const resultEmail = await mysql.execute(queryEmail, [email]);
-      if (resultEmail.length > 0) return res.jsonConflict(null);
+      if (size(resultEmail)) return res.jsonConflict(null);
 
       await mysql.execute(query, [email, phone, sector, gender, id_user]);
 
@@ -374,6 +376,34 @@ router.put(
   },
 );
 
+/**
+ *  @api {delete} /users/:id_user 👤 Delete user
+ *  @apiVersion 0.1.0
+ *  @apiName Delete user 
+ *  @apiGroup Users
+ *  @apiDescription Deleta um funcionário
+ *  @apiPermission Coord
+ *
+ *  @apiUse BearerToken 
+ *  
+ *  @apiParam {Number} id_user      Id funcionário.
+ * 
+ *
+ *  @apiSuccessExample {json} Res válida
+HTTP/1.1 (200) OK
+{
+  "message": "Dados alterados com sucesso.",
+  "data": null,
+  "metadata": {},
+  "status": 200
+}
+ *
+ *
+ *  @apiUse UserNotFoundError
+ *  @apiUse UnauthorizedJwtExpired
+ *  @apiUse UnauthorizedSector
+ *  @apiUse UnauthorizedToken
+ */
 router.delete('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   const { id_user } = req.body;
 
@@ -393,14 +423,10 @@ router.delete('/:id_user', checkAuthCoord, checkId, async (req, res) => {
     await mysql.execute(queryLogin, [id_user]);
     await mysql.execute(queryUsers, [id_user]);
 
-    return res.jsonOK(null, 'Deletado com sucesso.');
+    return res.jsonOK(null, getMessages('users.delete.success'));
   } catch (error) {
     return res.jsonBadRequest(null, { error });
   }
-
-  /**
-   * documentar o metodo DELETE
-   */
 });
 
 module.exports = router;
