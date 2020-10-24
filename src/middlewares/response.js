@@ -17,7 +17,7 @@ const jsonOK = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const jsonBadRequest = function (data, message, metadata) {
@@ -29,7 +29,7 @@ const jsonBadRequest = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const jsonUnauthorized = function (data, message, metadata) {
@@ -41,7 +41,7 @@ const jsonUnauthorized = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const jsonNotFound = function (data, message, metadata) {
@@ -53,7 +53,7 @@ const jsonNotFound = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const jsonConflict = function (data, message, metadata) {
@@ -65,7 +65,7 @@ const jsonConflict = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const jsonServerError = function (data, message, metadata) {
@@ -77,7 +77,7 @@ const jsonServerError = function (data, message, metadata) {
   this.status(status);
   this.type(TYPE_JSON);
 
-  return this.json({ message, data, metadata, status: status });
+  return this.json({ message, data, metadata, status });
 };
 
 const resp = (req, res, next) => {
