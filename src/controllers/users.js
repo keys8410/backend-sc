@@ -10,7 +10,7 @@ const { generateUsername, generatePassword } = require('../helpers/generate');
 const { validateNewUser, validatePutUser } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
-const { sendAccessUser } = require('../mailer');
+const { sendMail } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
 const size = require('../helpers/size');
 
@@ -263,7 +263,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
       ]);
     });
 
-    sendAccessUser(email, { name, login, pass });
+    sendMail('sendAccessUser', email, { name, login, pass });
 
     return res.jsonOK(null, getMessages('users.post.success'));
   } catch (error) {

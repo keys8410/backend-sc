@@ -7,7 +7,7 @@ const shortUrl = require('node-url-shortener');
 const { generatePassword } = require('../helpers/generate');
 const { generateJwt, verifyJwt, generateJwtForgot } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
-const { sendTokenResetPass, sendNewPassword } = require('../mailer');
+const { sendMail } = require('../mailer');
 const size = require('../helpers/size');
 
 router.post('/sign-in', async (req, res) => {
@@ -70,7 +70,7 @@ router.post('/forgot-password', async (req, res) => {
     const rawUrl = `${url}/?key=${resetToken}`;
 
     shortUrl.short(rawUrl, (err, url) =>
-      sendTokenResetPass(email, { name, cpf, url }),
+      sendMail('sendTokenResetPass', email, { name, cpf, url }),
     );
 
     return res.jsonOK();
@@ -122,7 +122,7 @@ router.post('/reset-password', async (req, res) => {
 
     const { login } = await mysql.execute(queryLogin, [id_user]);
 
-    sendNewPassword(decoded.email, { name, login, newPass });
+    sendMail('sendNewPassword', decoded.email, { name, login, newPass });
 
     return res.jsonOK(
       null,
