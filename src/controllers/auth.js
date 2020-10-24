@@ -10,6 +10,59 @@ const { getMessages } = require('../helpers/messages');
 const { sendMail } = require('../mailer');
 const size = require('../helpers/size');
 
+/**
+ *  @api {post} /auth/sign-in ⛔ Login user
+ *  @apiVersion 0.1.0
+ *  @apiName Login user 
+ *  @apiGroup Auth
+ *  @apiDescription Loga um usuário
+ *
+ *  
+ *  @apiParam (Body) {string} Login             Login de acesso do usuário.
+ *  @apiParam (Body) {string} Pass              Senha de acesso do usuário.
+ * 
+ * 
+ *  @apiExample {json} Req válida
+{
+  "login": "yan.garcia-203",
+  "pass": "ry9hyqbq" 
+}
+
+ *
+ *
+ *  @apiExample {json} Req inválida
+{
+  "login": "",
+  "pass": "ry2tyqsq" 
+}
+ *
+ *  @apiSuccessExample {object} Res válida
+HTTP/1.1 (200) OK
+{
+  "message": "Login efetuado com sucesso.",
+  "data": {
+    "id_user": 1,
+    "sector": 1
+  },
+  "metadata": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+    eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM1NjQ2NzAsImV4cCI6MTYwMzU3MTg3MH0.
+    MRZAQE0QO_ugPI0Ejof4P4VYk4__pE7L5SxPypFPM7U"
+  },
+  "status": 200
+}
+ *
+ *
+ *  @apiSuccessExample {object} Res inválida
+HTTP/1.1 (400) OK
+{
+  "message": "Credenciais inválidas.",
+  "data": null,
+  "metadata": {},
+  "status": 400
+}
+ *
+ */
 router.post('/sign-in', async (req, res) => {
   const { login, pass } = req.body;
 
@@ -46,7 +99,7 @@ router.post('/sign-in', async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    return res.jsonBadRequest(error);
+    return res.jsonBadRequest(null, getMessages('account.signin.invalid'));
   }
 });
 
