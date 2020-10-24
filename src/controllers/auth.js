@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mysql = require('../config/mysql');
+const shortUrl = require('node-url-shortener');
 
 const { generatePassword } = require('../helpers/generate');
 const { generateJwt, verifyJwt, generateJwtForgot } = require('../helpers/jwt');
 const { getMessages } = require('../helpers/messages');
 const { sendTokenResetPass, sendNewPassword } = require('../mailer');
+const size = require('../helpers/size');
 
 router.post('/sign-in', async (req, res) => {
   const { login, pass } = req.body;
@@ -23,20 +25,20 @@ router.post('/sign-in', async (req, res) => {
   try {
     const user = await mysql.execute(query, [login]);
 
-    const match =
-      user.length !== 0 ? bcrypt.compareSync(pass, user[0].password) : null;
+    const match = user ? bcrypt.compareSync(pass, user.password) : null;
 
     if (!match)
       return res.jsonBadRequest(null, getMessages('account.signin.invalid'));
 
-    const { id_user } = user[0];
+    const { sector } = await mysql.execute(querySector, [user.id_user]);
 
-    const resultSector = await mysql.execute(querySector, [id_user]);
-
-    const token = generateJwt({ id_user, sector: resultSector[0].sector });
+    const token = generateJwt({
+      id_user: user.id_user,
+      sector,
+    });
 
     return res.jsonOK(
-      { id_user, sector: resultSector[0].sector },
+      { id_user: user.id_user, sector },
       getMessages('account.signin.success'),
       {
         token,
@@ -49,23 +51,27 @@ router.post('/sign-in', async (req, res) => {
 });
 
 router.post('/forgot-password', async (req, res) => {
-  const { email, cpf } = req.body;
+  const { cpf, url } = req.body;
 
   const queryEmail = `  SELECT 
                             * 
                         FROM 
                             tb_users 
-                        WHERE email = ? 
-                        AND cpf = ?
+                        WHERE cpf = ?
                         AND state = 1`;
 
   try {
-    const resultEmail = await mysql.execute(queryEmail, [email, cpf]);
-    if (resultEmail.length === 0) return res.jsonBadRequest();
+    const resultEmail = await mysql.execute(queryEmail, [cpf]);
+    const { email, name } = resultEmail;
+
+    if (size(resultEmail)) return res.jsonBadRequest(null);
 
     const resetToken = generateJwtForgot({ email, cpf });
+    const rawUrl = `${url}/?key=${resetToken}`;
 
-    sendTokenResetPass(email, { resetToken });
+    shortUrl.short(rawUrl, (err, url) =>
+      sendTokenResetPass(email, { name, cpf, url }),
+    );
 
     return res.jsonOK();
   } catch (error) {
@@ -105,8 +111,7 @@ router.post('/reset-password', async (req, res) => {
   try {
     const SALTS = 10;
 
-    const resultCpf = await mysql.execute(queryCpf, [cpf]);
-    const { id_user, name } = resultCpf[0];
+    const { id_user, name } = await mysql.execute(queryCpf, [cpf]);
 
     const newPass = generatePassword();
     bcrypt.hash(newPass, SALTS, async (error, hashPass) => {
@@ -115,8 +120,7 @@ router.post('/reset-password', async (req, res) => {
       await mysql.execute(queryResetPass, [hashPass, id_user]);
     });
 
-    const resultLogin = await mysql.execute(queryLogin, [id_user]);
-    const { login } = resultLogin[0];
+    const { login } = await mysql.execute(queryLogin, [id_user]);
 
     sendNewPassword(decoded.email, { name, login, newPass });
 
