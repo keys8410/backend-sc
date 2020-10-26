@@ -1,5 +1,6 @@
 const { verifyJwt, getTokenFromHeaders } = require('../helpers/jwt');
 const SECTOR_CONFIG = require('../config/sector');
+
 const { getMessages } = require('../helpers/messages');
 
 const checkAuthMaster = (req, res, next) => {};
