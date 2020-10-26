@@ -1,5 +1,5 @@
 /**
- *  @apiDefine UserNotFoundError
+ *  @apiDefine NotFound
  *
  *  @apiError UserNotFound Dado(s) solicitado(s) não encontrado(s).
  *
@@ -88,5 +88,20 @@ HTTP/1.1 (401) Unauthorized Decoded Sector
 /**
  * @apiDefine ContentType
  *
- * @apiHeader {string} Content-Type       application/json;
+ * @apiHeader {string} Content-Type       application/json
+ */
+
+/**
+ * @apiDefine BadRequest
+ *
+ * @apiError BadRequest Decoded token com dados inválidos.
+ *
+ * @apiErrorExample {json} Sector
+HTTP/1.1 (401) Unauthorized Decoded Sector
+{
+  "message": "Invalid token - sector",
+  "data": null,
+  "metadata": {},
+  "status": 401
+}
  */
