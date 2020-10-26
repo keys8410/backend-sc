@@ -13,6 +13,7 @@ const checkId = require('../middlewares/checkId');
 const { sendMail } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
 const { verifySize } = require('../helpers/helpers');
+const { getValidatorError } = require('../helpers/validator');
 
 /**
  *  @api {get} /users 👥 All users
@@ -67,7 +68,8 @@ router.get('/', checkAuthCoord, async (req, res) => {
 
   try {
     const result = await mysql.execute(query);
-    if (result.length === 0) return res.jsonNotFound();
+    if (verifySize(result))
+      return res.jsonNotFound(null, getMessages('users.get.erorr'));
 
     const response = {
       total: result.length,
@@ -76,7 +78,8 @@ router.get('/', checkAuthCoord, async (req, res) => {
 
     return res.jsonOK(response);
   } catch (error) {
-    return res.status(404).jsonBadRequest(null, { error });
+    console.log(error);
+    return res.jsonBadRequest(null);
   }
 });
 
@@ -141,12 +144,13 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
 
   try {
     const user = await mysql.execute(query, [id_user]);
-    if (verifySize(user)) return res.jsonNotFound();
+    if (verifySize(user))
+      return res.jsonNotFound(null, getMessages('users.get.erorr'));
 
     return res.jsonOK({ user });
   } catch (error) {
     console.log(error);
-    return res.jsonBadRequest({ error });
+    return res.jsonBadRequest(null);
   }
 });
 
@@ -257,7 +261,7 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
     if (verifySize(resultEmail)) return res.jsonConflict(null);
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
-      if (error) res.jsonBadRequest(error);
+      if (error) return res.jsonBadRequest(error);
 
       const { insertId } = await mysql.execute(queryLogin, [login, hashPass]);
 
@@ -276,7 +280,8 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
     return res.jsonOK(null, getMessages('users.post.success'));
   } catch (error) {
-    return res.jsonBadRequest(null, { error });
+    console.log(error);
+    return res.jsonBadRequest(null);
   }
 });
 
@@ -381,7 +386,8 @@ router.put(
 
       return res.jsonOK(null, getMessages('users.put.success'));
     } catch (error) {
-      return res.jsonBadRequest(null, { error });
+      console.log(error);
+      return res.jsonBadRequest(null);
     }
   },
 );
@@ -436,7 +442,8 @@ router.delete('/:id_user', checkAuthCoord, checkId, async (req, res) => {
 
     return res.jsonOK(null, getMessages('users.delete.success'));
   } catch (error) {
-    return res.jsonBadRequest(null, { error });
+    console.log(error);
+    return res.jsonBadRequest(null);
   }
 });
 
