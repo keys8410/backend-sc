@@ -46,7 +46,7 @@ const { getValidatorError } = require('../helpers/validator');
  *      "status": 200
  *    }
  *
- *  @apiUse UserNotFoundError
+ *  @apiUse NotFound
  *  @apiUse UnauthorizedJwtExpired
  *  @apiUse UnauthorizedSector
  *  @apiUse UnauthorizedToken
@@ -116,7 +116,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
  *    "metadata": {},
  *    "status": 200
  *   }
- *  @apiUse UserNotFoundError
+ *  @apiUse NotFound
  *  @apiUse UnauthorizedJwtExpired
  *  @apiUse UnauthorizedSector
  *  @apiUse UnauthorizedToken
@@ -346,7 +346,7 @@ HTTP/1.1 (400) Bad Request
   "status": 400
 }
  * 
- *  @apiUse UserNotFoundError
+ *  @apiUse NotFound
  *  @apiUse DataConflict
  *  @apiUse UnauthorizedJwtExpired
  *  @apiUse UnauthorizedSector
@@ -416,7 +416,7 @@ HTTP/1.1 (200) OK
 }
  *
  *
- *  @apiUse UserNotFoundError
+ *  @apiUse NotFound
  *  @apiUse UnauthorizedJwtExpired
  *  @apiUse UnauthorizedSector
  *  @apiUse UnauthorizedToken

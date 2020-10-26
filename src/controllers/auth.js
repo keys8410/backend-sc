@@ -110,8 +110,8 @@ router.post('/sign-in', async (req, res) => {
  *
  *  @apiUse ContentType
  *  
- *  @apiParam (Body) {string} Login              Login de acesso do usuário.
- *  @apiParam (Body) {string} Pass              Senha de acesso do usuário.
+ *  @apiParam (Body) {string} CPF              CPF do funcionário.
+ *  @apiParam (Body) {string} URL              Endpoint (window.location.href) partindo do front.
  *  
  *  @apiExample {json} Req válida
 {
@@ -122,49 +122,39 @@ router.post('/sign-in', async (req, res) => {
  *
  *  @apiExample {json} Req inválida
 {
-  "cpf": "000.000.000-00",
-  "url": "http://localhost:3001/v1/api"
+  "cpf": "a0.00.000-00",
+  "url": ""
 }
  *
  *  @apiSuccessExample {json} Res válida
 HTTP/1.1 (200) OK
 {
-  "message": "Login efetuado com sucesso.",
-  "data": {
-    "id_user": 1,
-    "sector": 1
-  },
-  "metadata": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
-    eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM1NjQ2NzAsImV4cCI6MTYwMzU3MTg3MH0.
-    MRZAQE0QO_ugPI0Ejof4P4VYk4__pE7L5SxPypFPM7U"
-  },
+  "message": "Email enviado com sucesso.",
+  "data": null,
+  "metadata": {},
   "status": 200
 }
  *
  *
- *  @apiSuccessExample {json} Res inválida
+ *  @apiErrorExample {json} Res inválida - CPF 
+HTTP/1.1 (404) Not Found
+{
+  "message": "CPF não encontrado",
+  "data": null,
+  "metadata": {},
+  "status": 404
+}
+ *
+ *
+ * @apiErrorExample {json} Res inválida - URL
 HTTP/1.1 (400) Bad Request
 {
-  "message": "Credenciais inválidas.",
+  "message": "Formato de URL inválido.",
   "data": null,
   "metadata": {},
   "status": 400
 }
  *
- * @apiError UnauthorizedSector Decoded token com dados inválidos.
- *
- * @apiErrorExample {json} Sector
-HTTP/1.1 (4010) Unauthorized Decoded Sector
-{
-  "message": "Requisição inválida.",
-  "data": {
-    "error": "Url inválida."
-  },
-  "metadata": {},
-  "status": 400
-}
-
  *
  */
 router.post('/forgot-password', async (req, res) => {
@@ -178,25 +168,31 @@ router.post('/forgot-password', async (req, res) => {
                         AND state = 1`;
 
   if (verifyRegex(/( *?https{0,1}:\/\/)/, url))
-    return res.jsonBadRequest({ error: 'Url inválida.' });
+    return res.jsonBadRequest(null, getMessages('auth.forgot.url_error'));
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [cpf]);
     const { email, name } = resultEmail;
 
-    if (verifySize(resultEmail)) return res.jsonBadRequest(null);
+    if (verifySize(resultEmail))
+      return res.jsonNotFound(null, getMessages('auth.forgot.cpf_not_found'));
 
     const resetToken = generateJwtForgot({ email, cpf });
     const rawUrl = `${url}/?key=${resetToken}`;
 
     shortUrl.short(rawUrl, (err, url) =>
-      sendMail('sendTokenResetPass', email, { name, cpf, url }),
+      sendMail('sendfTokenResetPass', email, { name, cpf, url }),
     );
-
-    return res.jsonOK();
+    /**
+     * documentar route /auth/forgot-password
+     * finalizar metodos e responses
+     * verificar pendencias
+     * gravar video
+     */
+    return res.jsonOK(null, getMessages('auth.forgot.email_success'));
   } catch (error) {
     console.log(error);
-    return res.jsonBadRequest(null, { error });
+    return res.jsonBadRequest(null);
   }
 });
 
@@ -226,7 +222,8 @@ router.post('/reset-password', async (req, res) => {
                               id_user = ?`;
 
   const decoded = verifyJwt(resetToken);
-  if (cpf !== decoded.cpf) return res.jsonUnauthorized(null, 'Invalid token');
+  if (cpf !== decoded.cpf)
+    return res.jsonUnauthorized(null, getMessages('auth.reset.token'));
 
   try {
     const SALTS = 10;
@@ -242,7 +239,7 @@ router.post('/reset-password', async (req, res) => {
 
     const { login } = await mysql.execute(queryLogin, [id_user]);
 
-    sendMail('sendNewPassword', decoded.email, { name, login, newPass });
+    //  sendMail('sendNewPassword', decoded.email, { name, login, newPass });
 
     return res.jsonOK(
       null,
@@ -250,7 +247,7 @@ router.post('/reset-password', async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    return res.jsonBadRequest();
+    return res.jsonBadRequest(null);
   }
 });
 
