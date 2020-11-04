@@ -4,11 +4,11 @@
 
 @tokenMaster = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMCwic2VjdG9yIjoxLCJpYXQiOjE2MDMzOTI0ODMsImV4cCI6MTYwMzM5OTY4M30.oFEuv2cOZBIn7W-MoDTmkSUth1sTe9gXKwAtlTv86pM
 
-@tokenCoord = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDM0Nzc3MjgsImV4cCI6MTYwMzQ4NDkyOH0.40nkLOFkgyrjxRig_zf_JpYOQ1lTcz4oXADIk8uP5IQ
+@tokenCoord = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMiwic2VjdG9yIjoyLCJpYXQiOjE2MDQ0NjM0OTIsImV4cCI6MTYwNDQ3MDY5Mn0.KBoG0LfUaOFitMDWhX6DiwwinLiYjTQJuGwIK2E7omU
 
 @tokenTech = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoyMCwic2VjdG9yIjoxLCJpYXQiOjE2MDMzOTI0ODMsImV4cCI6MTYwMzM5OTY4M30.oFEuv2cOZBIn7W-MoDTmkSUth1sTe9gXKwAtlTv86pM
 
-@resetToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InlhbmFsbWVpZGFnYXJjaWFAZ21haWwuY29tIiwiY3BmIjoiMDAwLjAyMC4wMDAtMTMiLCJpYXQiOjE2MDMwODQ2MTAsImV4cCI6MTYwMzA4NTUxMH0.BPQc-S6cHd5BH5fRqmScee77tdOa5n72KBPyWxg1E_I
+@resetToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InlhbmFsbWVpZGFnYXJjaWFAZ21haWwuY29tIiwiY3BmIjoiMDAwLjAyMC4wMDAtMTMiLCJpYXQiOjE2MDM4MjIzNTcsImV4cCI6MTYwMzgyMzI1N30.l5dhQ0dpMsyk3C3yDapTKjARtosN5gf2Ih1jw_YpcJU
 
 
 ### /auth/sign-in login user - coord (1)
@@ -29,11 +29,15 @@ Content-Type: {{contentType}}
 
 {
   "login": "yan.garcia-803",
-  "pass": "ry2tyqsq" 
+  "pass": "hqudrsdf" 
 }
 
 
 
+### /auth/user
+
+GET {{baseUrl}}/auth/user
+Authorization: Bearer {{tokenCoord}}
 
 ### /auth/forgot-password
 
@@ -41,10 +45,9 @@ POST {{baseUrl}}/auth/forgot-password
 Content-Type: {{contentType}}
 
 {
-  "email": "yanalmeidagarcia@gmail.com",
-  "cpf": "000.020.000-13"
+  "cpf": "000.020.000-13",
+  "url": "{{baseUrl}}"
 }
-
 
 ### /auth/reset-password
 
@@ -52,8 +55,8 @@ POST {{baseUrl}}/auth/reset-password
 Content-Type: {{contentType}}
 
 {
-  "resetToken": "{{resetToken}}",
-  "cpf": "000.020.000-13"
+  "cpf": "000.020.000-13",
+  "resetToken": "{{resetToken}}"
 }
 
 
@@ -65,7 +68,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{tokenCoord}}
 
 
-### /users unique user
+### /users/:id_user unique user
 GET {{baseUrl}}/users/1
 Content-Type: {{contentType}}
 Authorization: Bearer {{tokenCoord}}
@@ -86,7 +89,7 @@ Authorization: Bearer {{tokenCoord}}
 }
 
 
-### /users delete user
+### /users/:id_user delete user
 
 PUT {{baseUrl}}/users/223
 Content-Type: {{contentType}}
@@ -100,7 +103,7 @@ Authorization: Bearer {{tokenCoord}}
 }
 
 
-### /users delete user
+### /users/:id_user delete user
 
 DELETE {{baseUrl}}/users/15
 Content-Type: {{contentType}}

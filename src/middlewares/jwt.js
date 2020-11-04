@@ -18,7 +18,6 @@ const checkAuthCoord = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error);
     return res.jsonUnauthorized(
       null,
       getMessages('auth.invalid.expired_token'),

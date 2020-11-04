@@ -18,6 +18,18 @@
   "users.post.success": "Cadastro efetuado com sucesso.",
   "users.put.success": "Dados alterados com sucesso.",
 
+  "auth.forgot.cpf_not_found": "CPF não encontrado",
+  "auth.forgot.url_error": "Formato de URL inválido.",
+  "auth.forgot.email_success": "Email enviado com sucesso.",
+
+  "auth.invalid.token": "Invalid token - token.",
+  "auth.invalid.sector": "Invalid token - sector.",
+  "auth.invalid.expired_token": "Invalid token - jwt expired.",
+
+  "auth.reset.token": "Token inválido.",
+
+  "users.get.erorr": "Nenhum usuário encontrado.",
+
   "users.email_exists": "Email já cadastrado.",
   "users.email.string.empty": "Email obrigatório.",
   "users.email.any.required": "Email obrigatório.",

@@ -4,28 +4,8 @@ const http = require('http');
 const app = require('./index');
 const port = process.env.PORT;
 const server = http.createServer(app);
-const bodyParser = require('body-parser');
 
 server.listen(port);
-
-app.use(bodyParser.urlencoded({ extended: false })); // apenas dados simples
-app.use(bodyParser.json()); // json de entrada no body
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*'); // no lugar de *, poderia ser um servidor especifico https://meusite.com.br
-  res.header(
-    'Acces-Control-Allow-Header',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization',
-  );
-
-  if (req.method === 'OPTIONS' || req.method === 'options') {
-    res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');
-
-    return res.status(200).send({});
-  }
-
-  next();
-});
 
 app.use((req, res, next) => {
   const error = new Error('Nenhuma rota encontrada.');

@@ -13,7 +13,6 @@ const checkId = require('../middlewares/checkId');
 const { sendMail } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
 const { verifySize } = require('../helpers/helpers');
-const { getValidatorError } = require('../helpers/validator');
 
 /**
  *  @api {get} /users 👥 All users
@@ -145,7 +144,7 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
   try {
     const user = await mysql.execute(query, [id_user]);
     if (verifySize(user))
-      return res.jsonNotFound(null, getMessages('users.get.erorr'));
+      return res.jsonNotFound(null, getMessages('users.get.error'));
 
     return res.jsonOK({ user });
   } catch (error) {
