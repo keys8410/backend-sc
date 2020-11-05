@@ -316,6 +316,7 @@ router.post('/reset-password', async (req, res) => {
                               id_user = ?`;
 
   const decoded = verifyJwt(resetToken);
+
   if (cpf !== decoded.cpf)
     return res.jsonUnauthorized(null, getMessages('auth.forgot.cpf_not_found'));
 
