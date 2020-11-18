@@ -51,6 +51,15 @@ const { verifySize } = require('../helpers/helpers');
  *  @apiUse UnauthorizedToken
  */
 router.get('/', checkAuthCoord, async (req, res) => {
+  console.log('cuzin');
+  const cuzin = ` SELECT 
+                    gender
+                  FROM
+                    tb_gender
+                  ORDER BY
+                    gender
+                  ASC`;
+
   const query = ` SELECT
                       USER.id_user AS id,
                       USER.name,
@@ -66,13 +75,15 @@ router.get('/', checkAuthCoord, async (req, res) => {
                   ASC`;
 
   try {
+    const gender = await mysql.execute(cuzin);
+    console.log(gender);
     const result = await mysql.execute(query);
     if (verifySize(result))
-      return res.jsonNotFound(null, getMessages('users.get.erorr'));
+      return res.jsonNotFound(null, getMessages('users.get.error'));
 
     const response = {
       total: result.length,
-      users: result.map((user) => user),
+      users: [result].length !== 1 ? result.map((user) => user) : result,
     };
 
     return res.jsonOK(response);
@@ -257,14 +268,14 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (verifySize(resultEmail)) return res.jsonConflict(null);
+    if (!verifySize(resultEmail)) return res.jsonConflict(null);
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
       if (error) return res.jsonBadRequest(error);
 
       const { insertId } = await mysql.execute(queryLogin, [login, hashPass]);
 
-      await mysql.execute(queryNewUser, [
+      const resultNewUser = await mysql.execute(queryNewUser, [
         insertId,
         cpf,
         email,
@@ -273,6 +284,8 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
         sector,
         gender,
       ]);
+
+      if (verifySize(resultNewUser)) return res.jsonBadRequest(null);
     });
 
     sendMail('sendAccessUser', email, { name, login, pass });
