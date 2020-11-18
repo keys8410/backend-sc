@@ -8,18 +8,7 @@ const server = http.createServer(app);
 server.listen(port);
 
 app.use((req, res, next) => {
-  const error = new Error('Nenhuma rota encontrada.');
-  error.status = 400;
-
-  next(error);
-});
-
-app.use((error, req, res) => {
-  res.status(error.status || 500);
-
-  return res.send({
-    error: error.message,
-  });
+  return res.jsonBadRequest(null, 'Nenhuma rota encontrada.');
 });
 
 module.exports = app;
