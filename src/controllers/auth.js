@@ -16,7 +16,6 @@ const {
 const { getMessages } = require('../helpers/messages');
 const { sendMail } = require('../mailer');
 const { verifySize, verifyRegex } = require('../helpers/helpers');
-const { checkAuthCoord } = require('../middlewares/jwt');
 
 const SALTS = 10;
 
