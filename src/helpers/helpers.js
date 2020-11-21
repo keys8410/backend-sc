@@ -11,7 +11,18 @@ const verifyRegex = (reg, str) => {
   return !regex;
 };
 
+const dataNormalized = (val) => {
+  const normalized = val
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Zs]/g, '')
+    .toLowerCase();
+
+  return normalized;
+};
+
 module.exports = {
   verifySize,
   verifyRegex,
+  dataNormalized,
 };
