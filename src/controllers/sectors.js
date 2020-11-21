@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('../config/mysql');
-const { verifySize } = require('../helpers/helpers');
+const { verifySize, dataNormalized } = require('../helpers/helpers');
 
 router.get('/', async (req, res) => {
   const query = ` SELECT 
@@ -17,14 +17,9 @@ router.get('/', async (req, res) => {
     if (verifySize(sector)) return res.jsonConflict(null);
 
     const response = {
-      sector: { name: sector.map(({ sector }) => sector) },
-      sectorKey: sector.map(({ sector }) =>
-        sector
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-zA-Zs]/g, '')
-          .toLowerCase(),
-      ),
+      sector: sector.map(({ sector }) => {
+        return { value: sector, key: dataNormalized(sector) };
+      }),
     };
 
     return res.jsonOK(response);
