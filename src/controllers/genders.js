@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('../config/mysql');
-const { verifySize } = require('../helpers/helpers');
+const { verifySize, dataNormalized } = require('../helpers/helpers');
 
 router.get('/', async (req, res) => {
   const query = ` SELECT 
@@ -17,15 +17,14 @@ router.get('/', async (req, res) => {
     if (verifySize(gender)) return res.jsonConflict(null);
 
     const response = {
-      gender: { name: gender.map(({ gender }) => gender) },
-      genderKey: gender.map(({ gender }) =>
-        gender
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/[^a-zA-Zs]/g, '')
-          .toLowerCase(),
-      ),
+      gender: gender.map(({ gender }) => {
+        return {
+          value: gender,
+          key: dataNormalized(gender),
+        };
+      }),
     };
+
     return res.jsonOK(response);
   } catch (error) {
     console.log(error);
