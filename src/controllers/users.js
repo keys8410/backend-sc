@@ -83,7 +83,7 @@ router.get('/', checkAuthCoord, async (req, res) => {
 
     const response = {
       total: result.length,
-      users: [result].length !== 1 ? result.map((user) => user) : result,
+      users: [result].length !== 1 ? result.map((user) => user) : [result],
     };
 
     return res.jsonOK(response);
