@@ -17,9 +17,9 @@ router.get('/', async (req, res) => {
     if (verifySize(gender)) return res.jsonConflict(null);
 
     const response = {
-      gender: gender.map(({ gender }) => {
+      genders: gender.map(({ gender }) => {
         return {
-          value: gender,
+          gender: gender,
           key: dataNormalized(gender),
         };
       }),
