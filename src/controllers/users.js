@@ -51,20 +51,12 @@ const { verifySize } = require('../helpers/helpers');
  *  @apiUse UnauthorizedToken
  */
 router.get('/', checkAuthCoord, async (req, res) => {
-  console.log('cuzin');
-  const cuzin = ` SELECT 
-                    gender
-                  FROM
-                    tb_gender
-                  ORDER BY
-                    gender
-                  ASC`;
-
   const query = ` SELECT
                       USER.id_user AS id,
                       USER.name,
                       USER.about,
-                      SECTOR.sector
+                      SECTOR.sector,
+                      USER.state
                   FROM
                       tb_users USER
                   INNER JOIN tb_sector SECTOR ON
@@ -75,15 +67,13 @@ router.get('/', checkAuthCoord, async (req, res) => {
                   ASC`;
 
   try {
-    const gender = await mysql.execute(cuzin);
-    console.log(gender);
     const result = await mysql.execute(query);
     if (verifySize(result))
       return res.jsonNotFound(null, getMessages('users.get.error'));
 
     const response = {
       total: result.length,
-      users: [result].length !== 1 ? result.map((user) => user) : [result],
+      users: [result].length === 1 ? result.map((user) => user) : [result],
     };
 
     return res.jsonOK(response);
@@ -434,7 +424,7 @@ HTTP/1.1 (200) OK
  *  @apiUse UnauthorizedToken
  */
 router.delete('/:id_user', checkAuthCoord, checkId, async (req, res) => {
-  const { id_user } = req.body;
+  const { id_user } = req.params;
 
   const queryLogin = `  UPDATE 
                             tb_login 
