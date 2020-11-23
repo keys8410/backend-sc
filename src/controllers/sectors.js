@@ -17,8 +17,8 @@ router.get('/', async (req, res) => {
     if (verifySize(sector)) return res.jsonConflict(null);
 
     const response = {
-      sector: sector.map(({ sector }) => {
-        return { value: sector, key: dataNormalized(sector) };
+      sectors: sector.map(({ sector }) => {
+        return { sector: sector, key: dataNormalized(sector) };
       }),
     };
 
