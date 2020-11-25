@@ -230,9 +230,9 @@ router.post('/forgot-password', async (req, res) => {
     const resetToken = generateJwtForgot({ email, cpf });
     const rawUrl = `${url}/?key=${resetToken}`;
 
-    shortUrl.short(rawUrl, (err, url) =>
-      sendMail('sendTokenResetPass', email, { name, cpf, url }),
-    );
+    shortUrl.short(rawUrl, (err, url) => {
+      if (!err) sendMail('sendTokenResetPass', email, { name, cpf, url });
+    });
 
     return res.jsonOK(null, getMessages('auth.forgot.email_success'));
   } catch (error) {
@@ -330,15 +330,8 @@ router.post('/reset-password', async (req, res) => {
     });
 
     const { login } = await mysql.execute(queryLogin, [id_user]);
-
     sendMail('sendNewPassword', decoded.email, { name, login, newPass });
 
-    /**
-     * documentar route /auth/reset-password
-     * finalizar metodos e responses
-     * verificar pendencias
-     * gravar video
-     */
     return res.jsonOK(
       null,
       `Dados de acesso enviados no email ${decoded.email}`,
