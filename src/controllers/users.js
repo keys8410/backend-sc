@@ -7,7 +7,7 @@ const SALTS = 10;
 
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
-const { validateNewUser, validatePutUser } = require('../validators/users');
+const { validateUser } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
 const { sendMail } = require('../mailer');
@@ -228,8 +228,10 @@ HTTP/1.1 (400) Bad Request
  *  @apiUse UnauthorizedSector
  *  @apiUse UnauthorizedToken
  */
-router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
+router.post('/', checkAuthCoord, validateUser, async (req, res) => {
   const { cpf, email, name, phone, sector, gender } = req.body;
+
+  console.log(req.body);
 
   const login = generateUsername(name);
   const pass = generatePassword();
@@ -239,6 +241,12 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
                       FROM 
                           tb_users 
                       WHERE email = ? 
+                      AND state = 1`;
+  const queryCpf = `  SELECT 
+                          * 
+                      FROM 
+                          tb_users 
+                      WHERE cpf = ? 
                       AND state = 1`;
   const queryLogin = `INSERT INTO tb_login(
                       login,
@@ -258,7 +266,16 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
 
   try {
     const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (!verifySize(resultEmail)) return res.jsonConflict(null);
+    if (!verifySize(resultEmail))
+      return res.jsonConflict(null, null, {
+        error: { email: 'Email já cadastrado' },
+      });
+
+    const resultCpf = await mysql.execute(queryCpf, [cpf]);
+    if (!verifySize(resultCpf))
+      return res.jsonConflict(null, null, {
+        error: { cpf: 'CPF já cadastrado' },
+      });
 
     bcrypt.hash(pass, SALTS, async (error, hashPass) => {
       if (error) return res.jsonBadRequest(error);
@@ -276,9 +293,8 @@ router.post('/', checkAuthCoord, validateNewUser, async (req, res) => {
       ]);
 
       if (verifySize(resultNewUser)) return res.jsonBadRequest(null);
+      sendMail('sendAccessUser', email, { name, login, pass });
     });
-
-    sendMail('sendAccessUser', email, { name, login, pass });
 
     return res.jsonOK(null, getMessages('users.post.success'));
   } catch (error) {
@@ -358,7 +374,7 @@ router.put(
   '/:id_user',
   checkAuthCoord,
   checkId,
-  validatePutUser,
+  validateUser,
   async (req, res) => {
     const { id_user } = req.params;
     const { email, phone, sector, gender } = req.body;
