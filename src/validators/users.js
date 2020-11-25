@@ -17,7 +17,7 @@ const rules = {
   gender: Joi.required(),
 };
 
-const validateNewUser = (req, res, next) => {
+const validateUser = (req, res, next) => {
   const { cpf, email, name, phone, sector, gender } = req.body;
 
   const schema = Joi.object({
@@ -50,25 +50,4 @@ const validateNewUser = (req, res, next) => {
   next();
 };
 
-const validatePutUser = (req, res, next) => {
-  const { email, phone, sector, gender } = req.body;
-
-  const schema = Joi.object({
-    email: rules.email,
-    phone: rules.phone,
-    sector: rules.sector,
-    gender: rules.gender,
-  });
-
-  const { error } = schema.validate({ email, phone, sector, gender }, options);
-
-  if (error) {
-    const messages = getValidatorError(error, 'users');
-
-    return res.jsonBadRequest(null, null, { error: messages });
-  }
-
-  next();
-};
-
-module.exports = { validateNewUser, validatePutUser };
+module.exports = { validateUser };
