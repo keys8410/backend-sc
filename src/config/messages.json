@@ -17,6 +17,7 @@
 
   "users.post.success": "Cadastro efetuado com sucesso.",
   "users.put.success": "Dados alterados com sucesso.",
+  "users.delete.success": "Usuário removido com sucesso.",
 
   "auth.forgot.cpf_not_found": "CPF não encontrado",
   "auth.forgot.url_error": "Formato de URL inválido.",
