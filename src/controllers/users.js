@@ -7,19 +7,24 @@ const SALTS = 10;
 
 const { getMessages } = require('../helpers/messages');
 const { generateUsername, generatePassword } = require('../helpers/generate');
-const { validateUser } = require('../validators/users');
+const { validateUser, validateData } = require('../validators/users');
 
 const checkId = require('../middlewares/checkId');
 const { sendMail } = require('../mailer');
 const { checkAuthCoord } = require('../middlewares/jwt');
 const { verifySize } = require('../helpers/helpers');
+const { getTokenFromHeaders, verifyJwt } = require('../helpers/jwt');
+
+/**
+ * get all, mudar
+ */
 
 /**
  *  @api {get} /users 👥 All users
  *  @apiVersion 0.1.0
  *  @apiName List
  *  @apiGroup Users
- *  @apiDescription Retorna todos4 os funcionários
+ *  @apiDescription Retorna todos os funcionários
  *  @apiPermission Coord
  *
  *  @apiUse BearerToken
@@ -62,18 +67,26 @@ router.get('/', checkAuthCoord, async (req, res) => {
                   INNER JOIN tb_sector SECTOR ON
                       USER.sector = SECTOR.id_sector
                   WHERE USER.state = 1
+                  AND
+                      USER.id_user <> ?
                   ORDER BY
-                      USER.id_user 
+                      USER.name 
                   ASC`;
 
+  const token = getTokenFromHeaders(req.headers);
+  if (!token)
+    return res.jsonUnauthorized(null, getMessages('auth.invalid.token'));
+
   try {
-    const result = await mysql.execute(query);
+    const decoded = verifyJwt(token);
+
+    const result = await mysql.execute(query, [decoded.id_user]);
     if (verifySize(result))
       return res.jsonNotFound(null, getMessages('users.get.error'));
 
     const response = {
       total: result.length,
-      users: [result].length === 1 ? result.map((user) => user) : [result],
+      users: Array.isArray(result) ? result : [result],
     };
 
     return res.jsonOK(response);
@@ -130,7 +143,9 @@ router.get('/:id_user', checkAuthCoord, checkId, async (req, res) => {
                       USER.email,
                       USER.cpf,
                       USER.phone,
+                      USER.sector as idSector, 
                       SECTOR.sector,
+                      USER.gender as idGender,
                       GENDER.gender
                   FROM
                       tb_users USER
@@ -228,32 +243,23 @@ HTTP/1.1 (400) Bad Request
  *  @apiUse UnauthorizedSector
  *  @apiUse UnauthorizedToken
  */
-router.post('/', checkAuthCoord, validateUser, async (req, res) => {
-  const { cpf, email, name, phone, sector, gender } = req.body;
+router.post(
+  '/',
+  checkAuthCoord,
+  validateUser,
+  validateData,
+  async (req, res) => {
+    const { cpf, email, name, phone, sector, gender } = req.body;
 
-  console.log(req.body);
+    const login = generateUsername(name);
+    const pass = generatePassword();
 
-  const login = generateUsername(name);
-  const pass = generatePassword();
-
-  const queryEmail = ` SELECT 
-                          * 
-                      FROM 
-                          tb_users 
-                      WHERE email = ? 
-                      AND state = 1`;
-  const queryCpf = `  SELECT 
-                          * 
-                      FROM 
-                          tb_users 
-                      WHERE cpf = ? 
-                      AND state = 1`;
-  const queryLogin = `INSERT INTO tb_login(
+    const queryLogin = `INSERT INTO tb_login(
                       login,
                       password
                   )
                   VALUES(?, ?)`;
-  const queryNewUser = `INSERT INTO tb_users(
+    const queryNewUser = `INSERT INTO tb_users(
                             id_user,
                             cpf,
                             email,
@@ -264,44 +270,33 @@ router.post('/', checkAuthCoord, validateUser, async (req, res) => {
                         )
                         VALUES(?, ?, ?, ?, ?, ?, ?)`;
 
-  try {
-    const resultEmail = await mysql.execute(queryEmail, [email]);
-    if (!verifySize(resultEmail))
-      return res.jsonConflict(null, null, {
-        error: { email: 'Email já cadastrado' },
+    try {
+      bcrypt.hash(pass, SALTS, async (error, hashPass) => {
+        if (error) return res.jsonBadRequest(error);
+
+        const { insertId } = await mysql.execute(queryLogin, [login, hashPass]);
+
+        const resultNewUser = await mysql.execute(queryNewUser, [
+          insertId,
+          cpf,
+          email,
+          name,
+          phone,
+          Number(sector),
+          Number(gender),
+        ]);
+
+        if (verifySize(resultNewUser)) return res.jsonBadRequest(null);
+        else sendMail('sendAccessUser', email, { name, login, pass });
       });
 
-    const resultCpf = await mysql.execute(queryCpf, [cpf]);
-    if (!verifySize(resultCpf))
-      return res.jsonConflict(null, null, {
-        error: { cpf: 'CPF já cadastrado' },
-      });
-
-    bcrypt.hash(pass, SALTS, async (error, hashPass) => {
-      if (error) return res.jsonBadRequest(error);
-
-      const { insertId } = await mysql.execute(queryLogin, [login, hashPass]);
-
-      const resultNewUser = await mysql.execute(queryNewUser, [
-        insertId,
-        cpf,
-        email,
-        name,
-        phone,
-        sector,
-        gender,
-      ]);
-
-      if (verifySize(resultNewUser)) return res.jsonBadRequest(null);
-      sendMail('sendAccessUser', email, { name, login, pass });
-    });
-
-    return res.jsonOK(null, getMessages('users.post.success'));
-  } catch (error) {
-    console.log(error);
-    return res.jsonBadRequest(null);
-  }
-});
+      return res.jsonOK(null, getMessages('users.post.success'));
+    } catch (error) {
+      console.log(error);
+      return res.jsonBadRequest(null);
+    }
+  },
+);
 
 /**
  *  @api {put} /users/:id_user 👤 Edit user
@@ -377,30 +372,31 @@ router.put(
   validateUser,
   async (req, res) => {
     const { id_user } = req.params;
-    const { email, phone, sector, gender } = req.body;
+    const { name, cpf, email, phone, sector, gender } = req.body;
 
     const query = ` UPDATE
-                      tb_users
-                  SET
-                      email = ?,
-                      phone = ?,
-                      sector = ?,
-                      gender = ?
-                  WHERE
-                      id_user = ?
-                  AND state = 1`;
-    const queryEmail = `  SELECT 
-                              * 
-                          FROM 
-                              tb_users 
-                          WHERE email = ? 
-                          AND state = 1`;
+                        tb_users
+                    SET
+                        name= ?,
+                        cpf = ?,
+                        email = ?,
+                        phone = ?,
+                        sector = ?,
+                        gender = ?
+                    WHERE
+                        id_user = ?
+                    AND state = 1`;
 
     try {
-      const resultEmail = await mysql.execute(queryEmail, [email]);
-      if (verifySize(resultEmail)) return res.jsonConflict(null);
-
-      await mysql.execute(query, [email, phone, sector, gender, id_user]);
+      await mysql.execute(query, [
+        name,
+        cpf,
+        email,
+        phone,
+        sector,
+        gender,
+        id_user,
+      ]);
 
       return res.jsonOK(null, getMessages('users.put.success'));
     } catch (error) {
