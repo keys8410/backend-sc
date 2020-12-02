@@ -255,10 +255,11 @@ router.post(
     const pass = generatePassword();
 
     const queryLogin = `INSERT INTO tb_login(
-                      login,
-                      password
-                  )
-                  VALUES(?, ?)`;
+                          login,
+                          password
+                        )
+                        VALUES(?, ?)`;
+
     const queryNewUser = `INSERT INTO tb_users(
                             id_user,
                             cpf,
@@ -267,9 +268,13 @@ router.post(
                             phone,
                             sector,
                             gender
-                        )
-                        VALUES(?, ?, ?, ?, ?, ?, ?)`;
+                          )
+                          VALUES(?, ?, ?, ?, ?, ?, ?)`;
 
+    const querySocial = ` INSERT INTO tb_social(
+                            id_social
+                          )
+                          VALUES (?)`;
     try {
       bcrypt.hash(pass, SALTS, async (error, hashPass) => {
         if (error) return res.jsonBadRequest(error);
@@ -287,7 +292,10 @@ router.post(
         ]);
 
         if (verifySize(resultNewUser)) return res.jsonBadRequest(null);
-        else sendMail('sendAccessUser', email, { name, login, pass });
+
+        await mysql.execute(querySocial, [insertId]);
+
+        sendMail('sendAccessUser', email, { name, login, pass });
       });
 
       return res.jsonOK(null, getMessages('users.post.success'));
