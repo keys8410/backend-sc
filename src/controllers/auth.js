@@ -4,7 +4,6 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const mysql = require('../config/mysql');
 const shortUrl = require('node-url-shortener');
-const SECTOR_CONFIG = require('../config/sector');
 
 const { generatePassword } = require('../helpers/generate');
 const {
@@ -16,6 +15,7 @@ const {
 const { getMessages } = require('../helpers/messages');
 const { sendMail } = require('../mailer');
 const { verifySize, verifyRegex } = require('../helpers/helpers');
+const { validateUser } = require('../validators/users');
 
 const SALTS = 10;
 
@@ -85,6 +85,7 @@ router.post('/sign-in', async (req, res) => {
 
   try {
     const user = await mysql.execute(query, [login]);
+
     if (verifySize(user))
       return res.jsonBadRequest(null, getMessages('account.signin.invalid'));
 
@@ -122,21 +123,27 @@ router.get('/user', async (req, res, next) => {
                       USER.cpf,
                       USER.phone,
                       SECTOR.sector,
-                      GENDER.gender
+                      USER.sector as idSector,
+                      GENDER.gender,
+                      USER.gender as idGender,
+                      USER.about,
+                      SOCIAL.linkedin,
+                      SOCIAL.instagram,
+                      SOCIAL.github
                   FROM
                       tb_users USER
                   INNER JOIN tb_sector SECTOR ON
                       USER.sector = SECTOR.id_sector
                   INNER JOIN tb_gender GENDER ON
                       USER.gender = GENDER.id_gender
+                  INNER JOIN tb_social SOCIAL ON
+                      USER.id_user = SOCIAL.id_social
                   WHERE
                       id_user = ?
                   LIMIT 1`;
 
   try {
-    const { id_user, sector } = verifyJwt(token);
-    if (SECTOR_CONFIG.coord !== sector)
-      return res.jsonUnauthorized(null, getMessages('auth.invalid.sector'));
+    const { id_user } = verifyJwt(token);
 
     const user = await mysql.execute(query, [id_user]);
     if (verifySize(user))
@@ -144,6 +151,46 @@ router.get('/user', async (req, res, next) => {
 
     return res.jsonOK({ user });
   } catch (error) {
+    return res.jsonUnauthorized(
+      null,
+      getMessages('auth.invalid.expired_token'),
+    );
+  }
+});
+
+router.put('/user', validateUser, async (req, res, next) => {
+  const token = getTokenFromHeaders(req.headers);
+  const { name, phone, gender, about, linkedin, github, instagram } = req.body;
+
+  const queryUser = ` UPDATE
+                        tb_users
+                      SET
+                        name = ?,
+                        phone = ?,
+                        gender = ?,
+                        about = ?
+                      WHERE
+                        id_user = ?
+                      AND state = 1`;
+
+  const querySocial = ` UPDATE
+                        tb_social
+                      SET
+                        linkedin= ?,
+                        github = ?,
+                        instagram = ?
+                      WHERE
+                        id_social = ?`;
+
+  try {
+    const { id_user } = verifyJwt(token);
+    console.log(id_user);
+    await mysql.execute(queryUser, [name, phone, gender, about, id_user]);
+    await mysql.execute(querySocial, [linkedin, github, instagram, id_user]);
+
+    return res.jsonOK(null, getMessages('users.put.success'));
+  } catch (error) {
+    console.log(error);
     return res.jsonUnauthorized(
       null,
       getMessages('auth.invalid.expired_token'),
@@ -228,10 +275,12 @@ router.post('/forgot-password', async (req, res) => {
       return res.jsonNotFound(null, getMessages('auth.forgot.cpf_not_found'));
 
     const resetToken = generateJwtForgot({ email, cpf });
+    console.log(resetToken);
     const rawUrl = `${url}/?key=${resetToken}`;
 
     shortUrl.short(rawUrl, (err, url) => {
-      if (!err) sendMail('sendTokenResetPass', email, { name, cpf, url });
+      console.log(rawUrl);
+      sendMail('sendTokenResetPass', email, { name, cpf, url });
     });
 
     return res.jsonOK(null, getMessages('auth.forgot.email_success'));
